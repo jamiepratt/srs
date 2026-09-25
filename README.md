@@ -54,7 +54,9 @@ cards are in the Default deck. The study screen keeps the deck selector. The
 backup and account actions. **Export all cards** includes all cards;
 **Export selected deck** includes only cards in the selected deck and records
 its name even when empty.
-Both exports preserve the schedule and review history. The FSRS v4 cards were
+The export checkbox includes schedules and review history by default. Uncheck it
+to export card content and deck names only; importing that file starts each card
+with a new schedule and empty review history. The FSRS v4 cards were
 deleted during the FSRS-6 upgrade because their memory values are incompatible.
 Browser storage and JSON backups use version 2; older cards and backups are ignored.
 

@@ -42,8 +42,18 @@
         (update :reviews #(or % []))
         (update :revision #(or % 0)))))
 
+(defn decode-unscheduled-card [card]
+  (when-not (and (string? (:id card))
+                 (string? (:front card))
+                 (string? (:back card))
+                 (or (nil? (:deck card)) (string? (:deck card))))
+    (throw (js/Error. "Invalid card data")))
+  {:id (:id card) :front (:front card) :back (:back card)
+   :deck (if (seq (str/trim (or (:deck card) ""))) (:deck card) "Default")
+   :schedule (fsrs/new-card!) :reviews [] :revision 0})
+
 (defn parse-backup-data [raw]
-  (let [{:keys [version cards deck_name]}
+  (let [{:keys [version cards deck_name scheduling_data]}
         (js->clj (.parse js/JSON raw) :keywordize-keys true)]
     (when-not (and (= version 2) (vector? cards))
       (throw (js/Error. "An FSRS-6 backup is required")))
@@ -51,7 +61,8 @@
                (not (and (string? deck_name)
                          (<= 1 (count (str/trim deck_name)) 100))))
       (throw (js/Error. "Invalid deck name in backup")))
-    {:cards (mapv decode-card cards)
+    {:cards (mapv (if (false? scheduling_data)
+                    decode-unscheduled-card decode-card) cards)
      :deck-name (some-> deck_name str/trim)}))
 
 (defn parse-backup [raw]
@@ -59,9 +70,15 @@
 
 (defn backup-json
   ([cards] (backup-json cards nil))
-  ([cards deck-name]
+  ([cards deck-name] (backup-json cards deck-name true))
+  ([cards deck-name scheduling?]
    (.stringify js/JSON
-               (clj->js (cond-> {:version 2 :cards (mapv encode-card cards)}
+               (clj->js (cond-> {:version 2
+                                 :cards (mapv (if scheduling?
+                                                encode-card
+                                                #(select-keys % [:id :front :back :deck]))
+                                              cards)}
+                          (not scheduling?) (assoc :scheduling_data false)
                           deck-name (assoc :deck_name deck-name)))
                nil 2)))
 
@@ -94,6 +111,7 @@
     {:cards [] :user nil :auth-loading? true :busy? false
      :decks ["Default"] :current-deck "Default"
      :legacy-count (legacy-count) :selected-id nil :revealed? false
+     :export-scheduling? true
      :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
      :message nil :storage-error nil}
     (try
@@ -102,11 +120,13 @@
         {:cards cards :decks decks
          :current-deck (valid-current-deck "Default" decks cards)
          :selected-id nil :revealed? false
+         :export-scheduling? true
          :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :storage-error nil :busy? false})
       (catch :default error
         {:cards [] :decks ["Default"] :current-deck "Default"
          :selected-id nil :revealed? false
+         :export-scheduling? true
          :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :busy? false
          :storage-error (str "Could not read saved cards: " (.-message error))}))))
@@ -615,9 +635,9 @@
   (.toLocaleString (js/Date. (str (get-in card [:schedule :due])))))
 
 (defn download-backup!
-  ([cards] (download-backup! cards "srs-cards.json" nil))
-  ([cards filename deck-name]
-   (let [blob (js/Blob. #js [(backup-json cards deck-name)]
+  ([cards] (download-backup! cards "srs-cards.json" nil true))
+  ([cards filename deck-name scheduling?]
+   (let [blob (js/Blob. #js [(backup-json cards deck-name scheduling?)]
                         #js {:type "application/json"})
          url (.createObjectURL js/URL blob)
          link (element "a" nil nil)]
@@ -629,14 +649,15 @@
      (js/setTimeout #(.revokeObjectURL js/URL url) 1000))))
 
 (defn export! []
-  (download-backup! (:cards @app-state)))
+  (download-backup! (:cards @app-state) "srs-cards.json" nil
+                    (:export-scheduling? @app-state)))
 
 (defn export-current-deck! []
   (let [name (:current-deck @app-state)
         slug (str/replace (str/lower-case name) #"[^a-z0-9]+" "-")]
     (download-backup! (selected-deck-cards)
                       (str "srs-" (if (seq slug) slug "deck") ".json")
-                      name)))
+                      name (:export-scheduling? @app-state))))
 
 (defn import-cloud-cards! [cards remove-browser-copy?]
   (when (and (seq cards) (not (:busy? @app-state)))
@@ -806,6 +827,15 @@
     (append! backups (element "h2" nil "Backups"))
     (append! backups (element "p" "format-hint"
                               "Download all cards or only the selected deck. Import a JSON backup to restore cards."))
+    (let [label (element "label" "export-option" nil)
+          checkbox (element "input" nil nil)]
+      (set! (.-type checkbox) "checkbox")
+      (set! (.-checked checkbox) (:export-scheduling? @app-state))
+      (.addEventListener checkbox "change"
+                         #(swap! app-state assoc :export-scheduling?
+                                 (.. % -target -checked)))
+      (append! label checkbox (.createTextNode js/document " Include scheduling data and review history"))
+      (append! backups label))
     (let [actions (element "div" "management-actions" nil)]
       (append! actions (button "Export selected deck" "button secondary" export-current-deck!)
                (button "Export all cards" "button secondary" export!)

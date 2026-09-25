@@ -45,6 +45,8 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .management-panel .deck-label { display: flex; flex-direction: column; align-items: start; }
 .management-panel .deck-select { width: 100%; max-width: none; margin-top: 7px; }
 .deck-count { margin: 12px 0 0; }
+.export-option { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: .9rem; cursor: pointer; }
+.export-option input { margin: 0; accent-color: #367954; }
 .management-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .management-panel .account-email { display: block; margin-bottom: 14px; overflow-wrap: anywhere; }
 .management-panel > .button + .button { margin-left: 9px; }
