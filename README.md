@@ -1,11 +1,8 @@
 # Spaced Repetition System
 
-This repository will contain a spaced repetition system.
-
 The [cljc-fsrs fork](https://github.com/jamiepratt/cljc-fsrs) scheduler is
-included as a Git submodule and used as a local Clojure dependency. It implements
-FSRS v4. The [FSRS-6 update](https://github.com/jamiepratt/cljc-fsrs/issues/1)
-is tracked in the fork.
+included as a Git submodule and used as a local Clojure dependency. It
+implements [FSRS-6](https://github.com/jamiepratt/cljc-fsrs/pull/2).
 
 After cloning this repository, initialize the submodule:
 
@@ -37,6 +34,11 @@ The app uses Supabase Auth email links and a Postgres `cards` table. Each row
 contains one user's card text, FSRS scheduling state, and review history. Row
 level security limits reads and writes to that user. A `revision` field rejects
 stale review updates from another device.
+
+The FSRS-6 schedule stores its version and learning step alongside stability,
+difficulty, due time, and review counts. The FSRS v4 cards were deleted during
+the FSRS-6 upgrade because their memory values are incompatible. Browser
+storage and JSON backups use version 2; older cards and backups are ignored.
 
 The [SRS Supabase project](https://supabase.com/dashboard/project/dvnddujfsmtwhfelfpdc)
 is in Frankfurt. Its migration is applied. `supabase/config.toml` holds the

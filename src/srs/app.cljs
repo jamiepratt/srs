@@ -4,7 +4,8 @@
             [srs.cloud :as cloud]
             [tick.core :as t]))
 
-(def storage-key "jamiepratt.srs.cards.v1")
+(def storage-key "jamiepratt.srs.cards.v2")
+(def old-storage-key "jamiepratt.srs.cards.v1")
 (def ratings [:again :hard :good :easy])
 (def states #{:new :learning :review :relearning})
 
@@ -20,6 +21,11 @@
                    (string? (:front card))
                    (string? (:back card))
                    (map? schedule)
+                   (= 6 (:fsrs-version schedule))
+                   (contains? schedule :step)
+                   (or (nil? (:step schedule))
+                       (and (integer? (:step schedule))
+                            (<= 0 (:step schedule))))
                    (contains? states (keyword (:state schedule)))
                    (every? number? (map schedule
                                         [:stability :difficulty :elapsed-days
@@ -36,13 +42,13 @@
 
 (defn parse-backup [raw]
   (let [{:keys [version cards]} (js->clj (.parse js/JSON raw) :keywordize-keys true)]
-    (when-not (and (= version 1) (vector? cards))
-      (throw (js/Error. "Unsupported backup format")))
+    (when-not (and (= version 2) (vector? cards))
+      (throw (js/Error. "An FSRS-6 backup is required")))
     (mapv decode-card cards)))
 
 (defn backup-json [cards]
   (.stringify js/JSON
-              (clj->js {:version 1 :cards (mapv encode-card cards)})
+              (clj->js {:version 2 :cards (mapv encode-card cards)})
               nil 2))
 
 (defn browser-cards []
@@ -518,6 +524,9 @@
             (review! (nth ratings (- (js/parseInt (.-key event)) 1))))))))
 
 (defn init! []
+  (try
+    (.removeItem js/localStorage old-storage-key)
+    (catch :default _ nil))
   (.addEventListener js/document "keydown" handle-key!)
   (when (cloud/configured?)
     (cloud/listen-auth! auth-changed!))
