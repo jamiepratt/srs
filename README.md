@@ -73,7 +73,8 @@ stored in Supabase Auth, not this repo.
 
 Sign in and use **Move browser cards** to copy cards from this browser's
 `localStorage` into your account. Export/import JSON backups remain available.
-Importing a backup into an account adds cards with new IDs.
+After selecting a backup, choose whether to keep its deck names, add all cards
+to an existing deck, or create a new deck. Importing adds cards with new IDs.
 
 Auth mail is sent through Resend as `SRS Cards <no-reply@submergedstructure.com>`.
 The domain has verified DKIM and return-path records at name.com. A sign-in

@@ -112,6 +112,7 @@
      :decks ["Default"] :current-deck "Default"
      :legacy-count (legacy-count) :selected-id nil :revealed? false
      :export-scheduling? true
+     :pending-import nil :import-destination "" :import-new-deck ""
      :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
      :message nil :storage-error nil}
     (try
@@ -121,12 +122,14 @@
          :current-deck (valid-current-deck "Default" decks cards)
          :selected-id nil :revealed? false
          :export-scheduling? true
+         :pending-import nil :import-destination "" :import-new-deck ""
          :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :storage-error nil :busy? false})
       (catch :default error
         {:cards [] :decks ["Default"] :current-deck "Default"
          :selected-id nil :revealed? false
          :export-scheduling? true
+         :pending-import nil :import-destination "" :import-new-deck ""
          :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :busy? false
          :storage-error (str "Could not read saved cards: " (.-message error))}))))
@@ -220,10 +223,12 @@
         (set-ui! {:user {:id user-id :email (aget user "email")}
                   :cards [] :decks ["Default"] :current-deck "Default"
                   :editing nil :busy? false :selected-id nil :revealed? false
+                  :pending-import nil :import-destination "" :import-new-deck ""
                   :auth-loading? true :message nil})
         (load-cloud! user-id))
       (set-ui! {:user nil :cards [] :decks ["Default"]
                 :current-deck "Default" :editing nil :selected-id nil :revealed? false
+                :pending-import nil :import-destination "" :import-new-deck ""
                 :auth-loading? false :busy? false :message nil}))))
 
 (defn create-cloud-card! [card]
@@ -659,27 +664,33 @@
                       (str "srs-" (if (seq slug) slug "deck") ".json")
                       name (:export-scheduling? @app-state))))
 
-(defn import-cloud-cards! [cards remove-browser-copy?]
-  (when (and (seq cards) (not (:busy? @app-state)))
-    (let [user-id (get-in @app-state [:user :id])
-          new-cards (mapv #(assoc % :id (str (random-uuid)) :revision 0) cards)]
-      (set-ui! {:busy? true})
-      (-> (cloud/insert-cards! (mapv #(cloud-row % user-id) new-cards))
-          (.then (fn [result]
-                   (if-let [error (cloud/error-message result)]
-                     (set-ui! {:busy? false
-                               :message (str "Import failed: " error)})
-                     (when (= user-id (get-in @app-state [:user :id]))
-                       (when remove-browser-copy?
-                         (.removeItem js/localStorage storage-key))
-                       (set-ui! {:cards (into (:cards @app-state) new-cards)
-                                 :legacy-count (if remove-browser-copy? 0
-                                                   (:legacy-count @app-state))
-                                 :busy? false :message nil}))))
-                 (fn [error]
-                   (set-ui! {:busy? false
-                             :message (str "Import failed: "
-                                           (.-message error))})))))))
+(defn import-cloud-cards!
+  ([cards remove-browser-copy?]
+   (import-cloud-cards! cards remove-browser-copy? nil))
+  ([cards remove-browser-copy? selected-deck]
+   (when (and (seq cards) (not (:busy? @app-state)))
+     (let [user-id (get-in @app-state [:user :id])
+           new-cards (mapv #(assoc % :id (str (random-uuid)) :revision 0) cards)]
+       (set-ui! {:busy? true})
+       (-> (cloud/insert-cards! (mapv #(cloud-row % user-id) new-cards))
+           (.then (fn [result]
+                    (if-let [error (cloud/error-message result)]
+                      (set-ui! {:busy? false
+                                :message (str "Import failed: " error)})
+                      (when (= user-id (get-in @app-state [:user :id]))
+                        (when remove-browser-copy?
+                          (.removeItem js/localStorage storage-key))
+                        (set-ui! {:cards (into (:cards @app-state) new-cards)
+                                  :decks (available-decks (:decks @app-state) new-cards)
+                                  :current-deck (or selected-deck (:current-deck @app-state))
+                                  :pending-import nil
+                                  :legacy-count (if remove-browser-copy? 0
+                                                    (:legacy-count @app-state))
+                                  :busy? false :message nil}))))
+                  (fn [error]
+                    (set-ui! {:busy? false
+                              :message (str "Import failed: "
+                                            (.-message error))}))))))))
 
 (defn migrate-browser-cards! []
   (try
@@ -717,27 +728,80 @@
 
 (defn import! [file]
   (when file
-    (let [reader (js/FileReader.)]
+    (let [reader (js/FileReader.)
+          user-id (get-in @app-state [:user :id])]
+      (swap! app-state assoc :pending-import nil)
       (set! (.-onload reader)
             (fn [_]
-              (try
-                (let [{:keys [cards deck-name]}
-                      (parse-backup-data (.-result reader))
-                      cards (if deck-name
-                              (mapv #(assoc % :deck deck-name) cards)
-                              cards)]
-                  (if (and deck-name (empty? cards))
-                    (create-deck! deck-name)
-                    (if (cloud/configured?)
-                      (when (js/confirm (str "Add " (count cards)
-                                             " backup cards to this account?"))
-                        (import-cloud-cards! cards false))
-                      (when (or (empty? (:cards @app-state))
-                                (js/confirm "Replace all current cards with this backup?"))
-                        (save-cards! cards {:selected-id nil :revealed? false})))))
-                (catch :default error
-                  (set-ui! {:message (str "Import failed: " (.-message error))})))))
+              (when (= user-id (get-in @app-state [:user :id]))
+                (try
+                  (set-ui! {:pending-import (assoc (parse-backup-data (.-result reader))
+                                                   :filename (.-name file))
+                            :import-destination "" :import-new-deck "" :message nil})
+                  (catch :default error
+                    (set-ui! {:pending-import nil
+                              :message (str "Import failed: " (.-message error))}))))))
+      (set! (.-onerror reader)
+            #(set-ui! {:pending-import nil :message "Import failed: Could not read the file."}))
       (.readAsText reader file))))
+
+(defn confirm-import! []
+  (when (and (:pending-import @app-state) (not (:busy? @app-state)))
+    (let [{:keys [cards deck-name]} (:pending-import @app-state)
+          choice (:import-destination @app-state)
+          new-name (str/trim (:import-new-deck @app-state))
+          destination (cond
+                        (= choice "source") nil
+                        (= choice "new") new-name
+                        (str/starts-with? choice "deck:") (subs choice 5))
+          valid-existing? (or (not (str/starts-with? choice "deck:"))
+                              (some #{destination} (deck-options)))
+          source-cards (if deck-name
+                         (mapv #(assoc % :deck deck-name) cards)
+                         cards)
+          target-cards (if destination
+                         (mapv #(assoc % :deck destination) cards)
+                         source-cards)
+          empty-deck (when (empty? cards)
+                       (if (= choice "source") deck-name destination))]
+      (cond
+        (empty? choice)
+        (set-ui! {:message "Choose where to import the cards."})
+
+        (and (= choice "source") (empty? cards) (not deck-name))
+        (set-ui! {:message "This backup has no cards or deck to import."})
+
+        (and (= choice "new") (or (empty? new-name) (> (count new-name) 100)))
+        (set-ui! {:message "Deck name must be 1 to 100 characters."})
+
+        (and (= choice "new")
+             (some #(= (str/lower-case %) (str/lower-case new-name))
+                   (deck-options)))
+        (set-ui! {:message "That deck already exists. Choose it from the list."})
+
+        (not valid-existing?)
+        (set-ui! {:message "Choose an existing deck."})
+
+        empty-deck
+        (if (some #{empty-deck} (deck-options))
+          (set-ui! {:pending-import nil :message "No cards to import."})
+          (do (set-ui! {:pending-import nil})
+              (create-deck! empty-deck)))
+
+        (cloud/configured?)
+        (import-cloud-cards! target-cards false destination)
+
+        :else
+        (try
+          (let [new-cards (mapv #(assoc % :id (str (random-uuid)) :revision 0)
+                                target-cards)
+                existing (or (browser-cards) [])]
+            (save-cards! (into existing new-cards)
+                         {:decks (available-decks (:decks @app-state) new-cards)
+                          :current-deck (or destination (:current-deck @app-state))
+                          :pending-import nil :selected-id nil :revealed? false}))
+          (catch :default error
+            (set-ui! {:message (str "Import failed: " (.-message error))})))))))
 
 (defn deck-picker []
   (let [label (element "label" "deck-label" "Deck")
@@ -791,6 +855,56 @@
              (element "p" "format-hint" description) label submit)
     form))
 
+(defn import-destination-panel []
+  (when-let [{:keys [cards deck-name filename]} (:pending-import @app-state)]
+    (let [panel (element "div" "import-preview" nil)
+          source-names (distinct (map :deck cards))
+          label (element "label" "management-label" "Import into")
+          select (element "select" "import-destination" nil)
+          choices (cond-> [["" "Choose a destination"]]
+                    (or deck-name (seq cards))
+                    (conj ["source" (if deck-name
+                                      (str "Keep deck name from file: " deck-name)
+                                      (str "Keep original deck names (" (count source-names) ")"))]))
+          choices (into choices
+                        (concat (map #(vector (str "deck:" %) (str "Existing deck: " %))
+                                     (deck-options))
+                                [["new" "Create a new deck"]]))]
+      (append! panel (element "h3" nil "Where should these cards go?")
+               (element "p" "format-hint"
+                        (str filename ": " (count cards) " cards. "
+                             (if (cloud/configured?)
+                               "They will be added to your account."
+                               "They will be added to this browser."))))
+      (doseq [[value title] choices]
+        (let [option (element "option" nil title)]
+          (set! (.-value option) value)
+          (append! select option)))
+      (set! (.-value select) (:import-destination @app-state))
+      (set! (.-disabled select) (boolean (:busy? @app-state)))
+      (.addEventListener select "change"
+                         #(set-ui! {:import-destination (.. % -target -value)
+                                    :message nil}))
+      (append! label select)
+      (append! panel label)
+      (when (= "new" (:import-destination @app-state))
+        (let [new-label (element "label" "management-label" "New deck name")
+              input (element "input" nil nil)]
+          (set! (.-type input) "text")
+          (set! (.-maxLength input) 100)
+          (set! (.-value input) (:import-new-deck @app-state))
+          (.addEventListener input "input"
+                             #(swap! app-state assoc :import-new-deck
+                                     (.. % -target -value)))
+          (append! new-label input)
+          (append! panel new-label)))
+      (append! panel
+               (button "Import cards" "button" confirm-import!)
+               (button "Cancel import" "button secondary"
+                       #(set-ui! {:pending-import nil :import-destination ""
+                                  :import-new-deck "" :message nil})))
+      panel)))
+
 (defn manage-decks-page []
   (let [page (element "div" "management-page" nil)
         intro (element "div" "management-intro" nil)
@@ -841,6 +955,7 @@
                (button "Export all cards" "button secondary" export!)
                (button "Import backup" "button secondary" #(.click picker)))
       (append! backups actions picker))
+    (append! backups (import-destination-panel))
     (when (and (cloud/configured?) (:user @app-state))
       (let [account (element "section" "management-panel" nil)]
         (append! account (element "h2" nil "Account")

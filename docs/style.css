@@ -48,6 +48,11 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .export-option { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: .9rem; cursor: pointer; }
 .export-option input { margin: 0; accent-color: #367954; }
 .management-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.import-preview { margin-top: 18px; padding: 18px; border: 1px solid #d9e2da; border-radius: 12px; background: #f7faf7; }
+.import-preview h3 { font-size: 1rem; margin: 0 0 8px; }
+.import-preview .management-label { margin-bottom: 14px; }
+.import-destination { display: block; width: 100%; margin-top: 7px; padding: 10px; border: 1px solid #bdcfc1; border-radius: 9px; background: #fff; }
+.import-preview .button + .button { margin-left: 9px; }
 .management-panel .account-email { display: block; margin-bottom: 14px; overflow-wrap: anywhere; }
 .management-panel > .button + .button { margin-left: 9px; }
 
