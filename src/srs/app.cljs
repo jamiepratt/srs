@@ -484,6 +484,31 @@
                                       "Add a card to get started."))))
     panel))
 
+(defn grammar-card? [card]
+  (boolean (when card
+             (.querySelector (card-fragment (:back card)) ".grammar-xray"))))
+
+(defn grammar-key []
+  (let [panel (element "section" "grammar-key" nil)
+        cases (element "div" "grammar-key-row" nil)
+        symbols (element "div" "grammar-key-row" nil)]
+    (doseq [[case label] [["nom" "nominative"] ["acc" "accusative"]
+                          ["ins" "instrumental"] ["gen" "genitive"]
+                          ["loc" "locative"] ["dat" "dative"]
+                          ["voc" "!! vocative"]]]
+      (append! cases (element "span" (str "grammar-case grammar-" case) label)))
+    (doseq [label ["♂ masculine" "♀ feminine" "⚧ neuter"
+                   "⚙️♂ inanimate" "🐶♂ non-human" "🙎‍♂️♂ human"]]
+      (append! symbols (element "span" nil label)))
+    (let [plural (element "span" nil nil)]
+      (append! plural (element "u" nil "plural"))
+      (append! symbols plural (element "span" nil "¹ ² ³ person")
+               (element "span" "grammar-focus-key" "highlighted = card form")))
+    (append! panel (element "h2" nil "Grammar x-ray key") cases symbols
+             (element "p" "grammar-key-note"
+                      "Person on possessives means the possessor; on verbs, the subject."))
+    panel))
+
 (defn card-list []
   (let [panel (element "section" "card-list" nil)
         cards (sort-by due-ms (:cards @app-state))
@@ -500,7 +525,8 @@
   (let [root (.getElementById js/document "app")
         {:keys [cards message storage-error user auth-loading?]} @app-state
         header (element "header" "site-header" nil)
-        layout (element "div" "layout" nil)]
+        layout (element "div" "layout" nil)
+        study-column (element "div" "study-column" nil)]
     (set! (.-textContent root) "")
     (append! header (element "div" nil nil))
     (append! (.-firstChild header)
@@ -521,8 +547,11 @@
       (and (cloud/configured?) (not user))
       (append! root (login-form))
       :else
-      (do
-        (append! layout (card-view (current-card))
+      (let [card (current-card)]
+        (append! study-column (card-view card))
+        (when (grammar-card? card)
+          (append! study-column (grammar-key)))
+        (append! layout study-column
                  (element "aside" "sidebar" nil))
         (append! (.-lastChild layout) (add-form) (card-list))
         (append! root layout)
