@@ -1,0 +1,14 @@
+{
+  "name": "srs-cards",
+  "private": true,
+  "scripts": {
+    "build": "shadow-cljs release app",
+    "watch": "shadow-cljs watch app"
+  },
+  "devDependencies": {
+    "shadow-cljs": "^3.5.3"
+  },
+  "dependencies": {
+    "@js-joda/core": "^6.1.0"
+  }
+}

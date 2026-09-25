@@ -1,3 +1,4 @@
 {:paths ["src"]
  :deps {io.github.open-spaced-repetition/cljc-fsrs
-        {:local/root "vendor/cljc-fsrs"}}}
+        {:local/root "vendor/cljc-fsrs"}
+        thheller/shadow-cljs {:mvn/version "3.5.3"}}}
