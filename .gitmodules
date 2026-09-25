@@ -1,0 +1,3 @@
+[submodule "vendor/cljc-fsrs"]
+	path = vendor/cljc-fsrs
+	url = https://github.com/open-spaced-repetition/cljc-fsrs.git
