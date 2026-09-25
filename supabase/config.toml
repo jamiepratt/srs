@@ -3,3 +3,12 @@ project_id = "srs"
 [auth]
 site_url = "https://srs.submergedstructure.com/"
 additional_redirect_urls = ["https://jamiepratt.github.io/srs/", "http://localhost:8765/"]
+
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 587
+user = "resend"
+pass = "env(SRS_RESEND_API_KEY)"
+admin_email = "no-reply@submergedstructure.com"
+sender_name = "SRS Cards"

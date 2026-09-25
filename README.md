@@ -47,17 +47,22 @@ storage and JSON backups use version 2; older cards and backups are ignored.
 
 The [SRS Supabase project](https://supabase.com/dashboard/project/dvnddujfsmtwhfelfpdc)
 is in Frankfurt. Its migration is applied. `supabase/config.toml` holds the
-public site URL and local redirect URL. `docs/config.js` contains the project
-URL and publishable browser key. Never put a secret or service-role key there.
+public site URL, local redirect URL, and Resend SMTP settings. `docs/config.js`
+contains the project URL and publishable browser key. Never put a secret or
+service-role key there.
 
-To apply later database migrations or Auth URL changes, run
-`supabase db push --linked` or `supabase config push` after reviewing
-`supabase config diff`.
+To apply later database migrations, run `supabase db push --linked`. To change
+Auth settings, set `SRS_RESEND_API_KEY` to the domain-restricted Resend sending
+key, review `supabase config diff`, then run `supabase config push`. The key is
+stored in Supabase Auth, not this repo.
 
 Sign in and use **Move browser cards** to copy cards from this browser's
 `localStorage` into your account. Export/import JSON backups remain available.
 Importing a backup into an account adds cards with new IDs.
 
-Supabase's default email sender only sends Auth emails to organization members.
-Sign-in for other users needs custom SMTP or a Send Email Auth Hook; see
-[issue #2](https://github.com/jamiepratt/srs/issues/2).
+Auth mail is sent through Resend as `SRS Cards <no-reply@submergedstructure.com>`.
+The domain has verified DKIM and return-path records at name.com. A sign-in
+message to an address outside the Supabase organization was delivered and its
+link redirected to `https://srs.submergedstructure.com/`; see
+[issue #2](https://github.com/jamiepratt/srs/issues/2). Supabase's custom SMTP
+rate limit starts at 30 messages per hour.
