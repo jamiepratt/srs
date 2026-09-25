@@ -52,6 +52,13 @@
     (js-invoke by-revision "select"
                "id,front,back,deck,schedule,reviews,revision")))
 
+(defn delete-card! [id revision]
+  (let [table (js-invoke client "from" "cards")
+        query (js-invoke table "delete")
+        by-id (js-invoke query "eq" "id" id)
+        by-revision (js-invoke by-id "eq" "revision" revision)]
+    (js-invoke by-revision "select" "id")))
+
 (defn list-decks! []
   (let [table (js-invoke client "from" "decks")
         query (js-invoke table "select" "name")]

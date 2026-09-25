@@ -199,11 +199,11 @@
       (when (not= user-id (get-in @app-state [:user :id]))
         (set-ui! {:user {:id user-id :email (aget user "email")}
                   :cards [] :decks ["Default"] :current-deck "Default"
-                  :selected-id nil :revealed? false
+                  :editing nil :busy? false :selected-id nil :revealed? false
                   :auth-loading? true :message nil})
         (load-cloud! user-id))
       (set-ui! {:user nil :cards [] :decks ["Default"]
-                :current-deck "Default" :selected-id nil :revealed? false
+                :current-deck "Default" :editing nil :selected-id nil :revealed? false
                 :auth-loading? false :busy? false :message nil}))))
 
 (defn create-cloud-card! [card]
@@ -302,6 +302,77 @@
                                 :revealed? false}))
           (catch :default error
             (set-ui! {:message (str "Review failed: " (.-message error))})))))))
+
+(defn change-cloud-card! [card fields]
+  (let [user-id (get-in @app-state [:user :id])]
+    (set-ui! {:busy? true :message nil})
+    (-> (if fields
+          (cloud/update-card! (:id card) (:revision card)
+                              (assoc fields :revision (inc (:revision card))))
+          (cloud/delete-card! (:id card) (:revision card)))
+        (.then (fn [result]
+                 (when (= user-id (get-in @app-state [:user :id]))
+                   (if-let [error (cloud/error-message result)]
+                     (set-ui! {:busy? false :message (str (if fields "Save failed: " "Delete failed: ") error)})
+                     (if-let [row (first (cloud/result-rows result))]
+                       (let [cards (if fields
+                                     (let [saved (decode-card row)]
+                                       (mapv #(if (= (:id %) (:id card)) saved %)
+                                             (:cards @app-state)))
+                                     (filterv #(not= (:id %) (:id card)) (:cards @app-state)))]
+                         (set-ui! {:cards cards :editing nil :busy? false :revealed? false
+                                   :selected-id (when fields (:id card))
+                                   :message (if fields "Card saved." "Card deleted.")}))
+                       (-> (load-cloud! user-id)
+                           (.then (fn [_]
+                                    (when (= user-id (get-in @app-state [:user :id]))
+                                      (set-ui! {:busy? false
+                                                :message (str "Card changed on another device. "
+                                                              (if-let [error (:message @app-state)]
+                                                                (str error " Reload the page before trying again.")
+                                                                (str "Cards refreshed. "
+                                                                     (if fields
+                                                                       "Cancel editing to see the latest version before trying again."
+                                                                       "Check the latest card before deleting again."))))})))))))))
+               (fn [error]
+                 (when (= user-id (get-in @app-state [:user :id]))
+                   (set-ui! {:busy? false :message (str (if fields "Save failed: " "Delete failed: ") (.-message error))})))))))
+
+(defn change-browser-card! [card fields]
+  (try
+    (let [cards (or (browser-cards) [])
+          current (some #(when (= (:id %) (:id card)) %) cards)]
+      (if (not= card current)
+        (set-ui! {:cards cards :selected-id nil :revealed? false
+                  :message (str "Card changed in another tab. Cards refreshed. "
+                                (if fields "Cancel editing to see the latest version before trying again."
+                                    "Check the latest card before deleting again."))})
+        (let [updated (when fields (-> card (merge fields) (update :revision inc)))
+              cards (if fields
+                      (mapv #(if (= (:id %) (:id card)) updated %) cards)
+                      (filterv #(not= (:id %) (:id card)) cards))]
+          (when (save-cards! cards {:editing nil :selected-id (when fields (:id card))
+                                    :revealed? false})
+            (set-ui! {:message (if fields "Card saved." "Card deleted.")})))))
+    (catch :default error
+      (set-ui! {:message (str "Save failed: " (.-message error))}))))
+
+(defn delete-card! [card]
+  (when (and (not (:busy? @app-state))
+             (js/confirm "Delete this card and its review history? This cannot be undone."))
+    (if (cloud/configured?)
+      (change-cloud-card! card nil)
+      (change-browser-card! card nil))))
+
+(defn edit-card! [card front back]
+  (when-not (:busy? @app-state)
+    (let [front (str/trim front)
+          back (str/trim back)]
+      (if (or (empty? front) (empty? back))
+        (set-ui! {:message "Front and back cannot be empty."})
+        (if (cloud/configured?)
+          (change-cloud-card! card {:front front :back back})
+          (change-browser-card! card {:front front :back back}))))))
 
 (defn make-card! [front back]
   (let [front (str/trim front)
@@ -658,7 +729,7 @@
     (set! (.-disabled select) (boolean (:busy? @app-state)))
     (.addEventListener select "change"
                        #(set-ui! {:current-deck (.. % -target -value)
-                                  :selected-id nil :revealed? false
+                                  :editing nil :selected-id nil :revealed? false
                                   :draft-rename-deck ""}))
     (append! label select)
     label))
@@ -813,6 +884,34 @@
              (element "p" "format-hint" "HTML fragments are supported. Scripts and unsafe attributes are removed.")
              submit)))
 
+(defn edit-card-form [card]
+  (let [form (element "form" "edit-card management-panel" nil)
+        front (element "textarea" nil nil)
+        back (element "textarea" nil nil)
+        front-label (element "label" nil "Front")
+        back-label (element "label" nil "Back")
+        submit (element "button" "button" "Save changes")]
+    (doseq [[field key] [[front :front] [back :back]]]
+      (set! (.-value field) (get-in @app-state [:editing key]))
+      (set! (.-rows field) 5)
+      (set! (.-disabled field) (boolean (:busy? @app-state)))
+      (set! (.-required field) true)
+      (.addEventListener field "input"
+                         #(swap! app-state assoc-in [:editing key] (.. % -target -value))))
+    (set! (.-type submit) "submit")
+    (set! (.-disabled submit) (boolean (:busy? @app-state)))
+    (.addEventListener form "submit"
+                       (fn [event]
+                         (.preventDefault event)
+                         (edit-card! card (.-value front) (.-value back))))
+    (append! front-label front)
+    (append! back-label back)
+    (append! form (element "h2" nil "Edit card")
+             (element "p" "format-hint" "Edit HTML or text. Schedule and review history are kept.")
+             front-label back-label submit
+             (button "Cancel editing" "button secondary" #(set-ui! {:editing nil :message nil})))
+    form))
+
 (defn card-view [card]
   (let [panel (element "section" "study-card" nil)]
     (if card
@@ -848,7 +947,13 @@
           (append! panel
                    (button "Show answer · Space" "button reveal"
                            #(set-ui! {:revealed? true}))))
-        (append! panel due move-label))
+        (let [actions (element "div" "card-actions" nil)]
+          (append! actions
+                   (button "Edit card" "button secondary"
+                           #(set-ui! {:editing {:card card :front (:front card) :back (:back card)}
+                                      :message nil}))
+                   (button "Delete card" "button danger" #(delete-card! card)))
+          (append! panel due move-label actions)))
       (append! panel
                (element "p" "empty" (if (seq (selected-deck-cards))
                                       "All caught up. Select a card to review early."
@@ -889,7 +994,7 @@
       (append! panel
                (button (str (card-summary (:front card)) (if (due? card) " · due" ""))
                        (str "list-card" (when (= selected-id (:id card)) " selected"))
-                       #(set-ui! {:selected-id (:id card) :revealed? false}))))
+                       #(set-ui! {:selected-id (:id card) :revealed? false :editing nil}))))
     panel))
 
 (defn render! []
@@ -925,7 +1030,9 @@
       (append! root (manage-decks-page))
       :else
       (let [card (current-card)]
-        (append! study-column (card-view card))
+        (append! study-column (if-let [editing (:editing @app-state)]
+                                (edit-card-form (:card editing))
+                                (card-view card)))
         (when (grammar-card? card)
           (append! study-column (grammar-key)))
         (append! layout study-column
@@ -947,7 +1054,8 @@
   (let [tag (.. event -target -tagName)
         typing? (contains? #{"INPUT" "TEXTAREA" "SELECT"} tag)]
     (when (and (not= "#manage-decks" (.-hash js/location))
-               (not typing?) (not (.-repeat event)))
+               (not typing?) (not (:editing @app-state)) (not (:busy? @app-state))
+               (not (.-repeat event)))
       (cond
         (and (= (.-code event) "Space") (current-card)
              (not (:revealed? @app-state)))
@@ -963,7 +1071,7 @@
     (.removeItem js/localStorage old-storage-key)
     (catch :default _ nil))
   (.addEventListener js/document "keydown" handle-key!)
-  (.addEventListener js/window "hashchange" render!)
+  (.addEventListener js/window "hashchange" #(set-ui! {:editing nil}))
   (when (cloud/configured?)
     (cloud/listen-auth! auth-changed!))
   (render!))

@@ -15,7 +15,13 @@ git submodule update --init --recursive
 The card viewer is written in ClojureScript. It shows the front and back of a
 card, records one of the four FSRS ratings, and selects the next due card. It
 also lets you organize cards into decks, add cards, and export or import a JSON
-backup.
+backup. Select any card in the list, then use **Edit card** to change its front
+and back without resetting its schedule or review history. **Cancel editing**
+discards the draft. **Delete card** asks for confirmation and permanently removes
+the card and its history. Both actions work with browser storage and Supabase.
+Cloud conflicts refresh the cards and keep an unsaved edit visible; cancel editing
+to inspect the latest version before retrying. Browser edits and deletions also
+check the saved card before writing, preserving changes already saved by another tab.
 
 Card fronts and backs accept HTML fragments such as `<strong>`, lists, links,
 and images. HTML is sanitized when displayed; scripts and unsafe attributes are
@@ -39,7 +45,7 @@ JavaScript is committed so Pages does not need to run ClojureScript tooling.
 The app uses Supabase Auth email links and a Postgres `cards` table. Each row
 contains one user's card text, FSRS scheduling state, and review history. Row
 level security limits reads and writes to that user. A `revision` field rejects
-stale review updates from another device.
+stale reviews, edits, moves, and deletions from another device.
 
 The FSRS-6 schedule stores its version and learning step alongside stability,
 difficulty, due time, and review counts. Each card also stores its deck. Existing

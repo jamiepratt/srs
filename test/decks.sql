@@ -95,3 +95,31 @@ begin
  end;
 end;
 $$;
+-- Card content updates and deletion use the same optimistic revision guard.
+set request.jwt.claim.sub='00000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $$
+declare
+ before_card cards%rowtype;
+ after_card cards%rowtype;
+ affected integer;
+begin
+ select * into before_card from cards where id='00000000-0000-0000-0000-000000000011';
+ update cards set front='Edited front',back='Edited back',revision=revision+1
+ where id=before_card.id and revision=before_card.revision;
+ get diagnostics affected = row_count;
+ if affected <> 1 then raise exception 'Guarded edit failed'; end if;
+ select * into after_card from cards where id=before_card.id;
+ if after_card.schedule is distinct from before_card.schedule or after_card.reviews is distinct from before_card.reviews then raise exception 'Edit lost schedule/history'; end if;
+ update cards set front='Stale edit' where id=before_card.id and revision=before_card.revision;
+ get diagnostics affected = row_count;
+ if affected <> 0 then raise exception 'Stale edit accepted'; end if;
+ delete from cards where id=before_card.id and revision=before_card.revision;
+ get diagnostics affected = row_count;
+ if affected <> 0 then raise exception 'Stale delete accepted'; end if;
+ delete from cards where id=after_card.id and revision=after_card.revision;
+ get diagnostics affected = row_count;
+ if affected <> 1 then raise exception 'Guarded delete failed'; end if;
+end;
+$$;
+reset role;
