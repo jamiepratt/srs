@@ -14,7 +14,8 @@ git submodule update --init --recursive
 
 The card viewer is written in ClojureScript. It shows the front and back of a
 card, records one of the four FSRS ratings, and selects the next due card. It
-also lets you add cards and export or import a JSON backup.
+also lets you organize cards into decks, add cards, and export or import a JSON
+backup.
 
 Card fronts and backs accept HTML fragments such as `<strong>`, lists, links,
 and images. HTML is sanitized when displayed; scripts and unsafe attributes are
@@ -41,7 +42,10 @@ level security limits reads and writes to that user. A `revision` field rejects
 stale review updates from another device.
 
 The FSRS-6 schedule stores its version and learning step alongside stability,
-difficulty, due time, and review counts. The FSRS v4 cards were deleted during
+difficulty, due time, and review counts. Each card also stores its deck. Existing
+cards are in the Default deck. **Export backup** includes all cards; **Export
+current deck** includes only cards in the selected deck. Both exports preserve
+the schedule and review history. The FSRS v4 cards were deleted during
 the FSRS-6 upgrade because their memory values are incompatible. Browser
 storage and JSON backups use version 2; older cards and backups are ignored.
 

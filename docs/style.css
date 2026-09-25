@@ -9,7 +9,7 @@
 
 body { margin: 0; }
 
-button, textarea { font: inherit; }
+button, textarea, select, input { font: inherit; }
 
 button { cursor: pointer; }
 
@@ -26,6 +26,13 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .subtitle { margin: 0; }
 
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.deck-label { display: inline-flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 650; }
+.deck-select { min-width: 120px; max-width: 220px; padding: 9px 10px; border: 1px solid #bdcfc1; border-radius: 9px; background: #fff; color: #20312c; }
+.deck-select:focus-visible { outline: 2px solid #367954; outline-offset: 1px; }
+.new-deck-form { display: inline-flex; align-items: end; gap: 6px; }
+.new-deck-form label { display: grid; gap: 3px; font-size: .75rem; font-weight: 650; }
+.new-deck-form input { width: 150px; padding: 9px 10px; border: 1px solid #bdcfc1; border-radius: 9px; }
 
 .account-email { align-self: center; color: #526b59; font-size: .88rem; }
 
@@ -93,6 +100,7 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .rating.easy { background: #2f657b; }
 
 .due { font-size: .88rem; margin: auto 0 0; padding-top: 32px; }
+.move-label { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: .82rem; color: #62736a; }
 
 .empty { color: #6b7c70; margin: auto; text-align: center; width: 100%; }
 
