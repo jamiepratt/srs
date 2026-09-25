@@ -66,6 +66,9 @@
   (js-invoke client "rpc" "rename_deck"
              #js {:old_name old-name :new_name new-name}))
 
+(defn delete-deck! [name]
+  (js-invoke client "rpc" "delete_deck" #js {:deck_name name}))
+
 (defn error-message [result]
   (some-> result (aget "error") (aget "message")))
 

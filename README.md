@@ -43,9 +43,11 @@ stale review updates from another device.
 
 The FSRS-6 schedule stores its version and learning step alongside stability,
 difficulty, due time, and review counts. Each card also stores its deck. Existing
-cards are in the Default deck. The shared deck-name field works with **New deck**
-and **Rename deck**. **Export backup** includes all cards; **Export current deck**
-includes only cards in the selected deck and records its name even when empty.
+cards are in the Default deck. The study screen keeps the deck selector. The
+**Manage decks** page has separate fields to create and rename decks, plus
+backup and account actions. **Export all cards** includes all cards;
+**Export selected deck** includes only cards in the selected deck and records
+its name even when empty.
 Both exports preserve the schedule and review history. The FSRS v4 cards were
 deleted during the FSRS-6 upgrade because their memory values are incompatible.
 Browser storage and JSON backups use version 2; older cards and backups are ignored.
@@ -71,3 +73,27 @@ message to an address outside the Supabase organization was delivered and its
 link redirected to `https://srs.submergedstructure.com/`; see
 [issue #2](https://github.com/jamiepratt/srs/issues/2). Supabase's custom SMTP
 rate limit starts at 30 messages per hour.
+
+### Deleting decks
+
+Manage decks can delete the selected deck after confirmation. Only empty decks
+can be deleted, and at least one deck must remain. Move cards to another deck
+from the study screen first. Deletion preserves all cards and their schedules.
+The remaining deck is selected automatically. Browser saves are checked again
+before deletion; cloud checks run in the database against current data.
+
+Migration `202609250005_delete_deck.sql` adds deck membership constraints and an
+authenticated deletion RPC. Apply it before deploying this UI. Concurrent cloud
+moves to a deleted deck fail; inserting or importing cards intentionally creates
+their named deck, including from older clients. Server rejections refresh decks
+and explain the failure, including stale selections or an unsaved initial Default
+deck. The database never cascades a deck deletion into card deletion.
+
+### Tests
+
+`npm test` builds and exercises the public UI with jsdom, localStorage, and a
+Supabase boundary stand-in. `npm run test:sql` requires local PostgreSQL with
+permission to create a temporary database (and test roles if absent). It applies
+all migrations, tests authenticated operations and isolation, and exercises
+concurrent card insertion/deletion and last-deck deletion. The temporary database
+and any roles created by the test are removed afterward.

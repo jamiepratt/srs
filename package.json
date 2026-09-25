@@ -3,9 +3,12 @@
   "private": true,
   "scripts": {
     "build": "cp node_modules/@supabase/supabase-js/dist/umd/supabase.js docs/js/supabase.js && cp node_modules/@supabase/supabase-js/LICENSE docs/js/supabase.LICENSE && cp node_modules/dompurify/dist/purify.min.js docs/js/purify.min.js && cp node_modules/dompurify/LICENSE docs/js/purify.LICENSE && shadow-cljs release app",
-    "watch": "shadow-cljs watch app"
+    "watch": "shadow-cljs watch app",
+    "test": "npm run build && node --test test/*.test.cjs",
+    "test:sql": "bash test/sql-test.sh"
   },
   "devDependencies": {
+    "jsdom": "^29.1.1",
     "shadow-cljs": "^3.5.3"
   },
   "dependencies": {

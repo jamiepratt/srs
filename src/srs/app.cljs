@@ -94,7 +94,7 @@
     {:cards [] :user nil :auth-loading? true :busy? false
      :decks ["Default"] :current-deck "Default"
      :legacy-count (legacy-count) :selected-id nil :revealed? false
-     :draft-front "" :draft-back "" :draft-deck ""
+     :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
      :message nil :storage-error nil}
     (try
       (let [cards (or (browser-cards) [])
@@ -102,12 +102,12 @@
         {:cards cards :decks decks
          :current-deck (valid-current-deck "Default" decks cards)
          :selected-id nil :revealed? false
-         :draft-front "" :draft-back "" :draft-deck ""
+         :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :storage-error nil :busy? false})
       (catch :default error
         {:cards [] :decks ["Default"] :current-deck "Default"
          :selected-id nil :revealed? false
-         :draft-front "" :draft-back "" :draft-deck ""
+         :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :busy? false
          :storage-error (str "Could not read saved cards: " (.-message error))}))))
 
@@ -331,7 +331,7 @@
 
         existing
         (set-ui! {:current-deck existing :selected-id nil :revealed? false
-                  :draft-deck "" :message nil})
+                  :draft-new-deck "" :draft-rename-deck "" :message nil})
 
         (cloud/configured?)
         (let [user-id (get-in @app-state [:user :id])]
@@ -345,7 +345,7 @@
                            (set-ui! {:decks (conj (:decks @app-state) name)
                                      :current-deck name :selected-id nil
                                      :revealed? false :busy? false :message nil
-                                     :draft-deck ""}))))
+                                     :draft-new-deck "" :draft-rename-deck ""}))))
                      (fn [error]
                        (set-ui! {:busy? false
                                  :message (str "Could not create deck: "
@@ -358,7 +358,7 @@
                       (.stringify js/JSON (clj->js names)))
             (set-ui! {:decks names :current-deck name
                       :selected-id nil :revealed? false :message nil
-                      :draft-deck ""}))
+                      :draft-new-deck "" :draft-rename-deck ""}))
           (catch :default error
             (set-ui! {:message (str "Could not create deck: "
                                     (.-message error))})))))))
@@ -390,7 +390,7 @@
                                      :message (str "Could not rename deck: " error)})
                            (do
                              (set-ui! {:current-deck name :selected-id nil
-                                       :revealed? false :draft-deck ""
+                                       :revealed? false :draft-rename-deck ""
                                        :auth-loading? true :busy? false :message nil})
                              (load-cloud! user-id)))))
                      (fn [error]
@@ -408,10 +408,61 @@
             (.setItem js/localStorage decks-storage-key
                       (.stringify js/JSON (clj->js names)))
             (set-ui! {:cards cards :decks names :current-deck name
-                      :draft-deck "" :message nil}))
+                      :draft-rename-deck "" :message nil}))
           (catch :default error
             (set-ui! {:message (str "Could not rename deck: "
                                     (.-message error))})))))))
+
+(defn delete-deck-blocked-reason []
+  (cond
+    (seq (selected-deck-cards)) "Move all cards to another deck before deleting this deck."
+    (< (count (deck-options)) 2) "Keep at least one deck. Create another deck first."))
+
+(defn delete-deck! []
+  (when (and (not (:busy? @app-state)) (nil? (delete-deck-blocked-reason)))
+    (let [name (:current-deck @app-state)]
+      (when (js/confirm (str "Delete empty deck \"" name "\"? This cannot be undone."))
+        (if (cloud/configured?)
+          (let [user-id (get-in @app-state [:user :id])]
+            (set-ui! {:busy? true})
+            (-> (cloud/delete-deck! name)
+                (.then (fn [result]
+                         (when (= user-id (get-in @app-state [:user :id]))
+                           (if-let [error (cloud/error-message result)]
+                             (do
+                               (set-ui! {:busy? false :auth-loading? true})
+                               (-> (load-cloud! user-id)
+                                   (.then #(when (= user-id (get-in @app-state [:user :id]))
+                                             (set-ui! {:message (str "Could not delete deck: " error)})))))
+                             (do
+                               (set-ui! {:busy? false :auth-loading? true
+                                         :selected-id nil :revealed? false
+                                         :draft-rename-deck ""})
+                               (load-cloud! user-id)))))
+                       (fn [error]
+                         (when (= user-id (get-in @app-state [:user :id]))
+                           (set-ui! {:busy? false
+                                     :message (str "Could not delete deck: " (.-message error))}))))))
+          (try
+            (let [cards (or (browser-cards) [])
+                  decks (available-decks (or (browser-decks) []) cards)
+                  reason (cond
+                           (some #(= name (:deck %)) cards)
+                           "Move all cards to another deck before deleting this deck."
+                           (< (count decks) 2)
+                           "Keep at least one deck. Create another deck first.")]
+              (if reason
+                (set-ui! {:cards cards :decks decks
+                          :current-deck (valid-current-deck name decks cards)
+                          :message reason})
+                (let [names (filterv #(not= name %) decks)]
+                  (.setItem js/localStorage decks-storage-key
+                            (.stringify js/JSON (clj->js names)))
+                  (set-ui! {:cards cards :decks names :current-deck (first names)
+                            :selected-id nil :revealed? false :draft-rename-deck ""
+                            :message nil}))))
+            (catch :default error
+              (set-ui! {:message (str "Could not delete deck: " (.-message error))}))))))))
 
 (defn move-card! [card deck]
   (when (and (not (:busy? @app-state)) (not= deck (:deck card)))
@@ -596,59 +647,112 @@
                   (set-ui! {:message (str "Import failed: " (.-message error))})))))
       (.readAsText reader file))))
 
-(defn deck-name-field []
-  (let [label (element "label" "deck-name-label" "Deck name")
-        input (element "input" nil nil)]
-    (set! (.-type input) "text")
-    (set! (.-maxLength input) 100)
-    (set! (.-placeholder input) "New or renamed deck")
-    (set! (.-value input) (:draft-deck @app-state))
-    (.addEventListener input "input"
-                       #(swap! app-state assoc :draft-deck (.. % -target -value)))
-    (append! label input)
+(defn deck-picker []
+  (let [label (element "label" "deck-label" "Deck")
+        select (element "select" "deck-select" nil)]
+    (doseq [name (deck-options)]
+      (let [option (element "option" nil name)]
+        (set! (.-value option) name)
+        (append! select option)))
+    (set! (.-value select) (:current-deck @app-state))
+    (set! (.-disabled select) (boolean (:busy? @app-state)))
+    (.addEventListener select "change"
+                       #(set-ui! {:current-deck (.. % -target -value)
+                                  :selected-id nil :revealed? false
+                                  :draft-rename-deck ""}))
+    (append! label select)
     label))
 
-(defn toolbar []
-  (let [bar (element "div" "toolbar" nil)]
+(defn nav-link [label href]
+  (let [link (element "a" "button secondary nav-link" label)]
+    (set! (.-href link) href)
+    link))
+
+(defn toolbar [manage?]
+  (let [bar (element "nav" "toolbar" nil)]
     (when (or (not (cloud/configured?)) (:user @app-state))
-      (let [picker (element "input" "file-input" nil)
-            import-button (button "Import" "button secondary" #(.click picker))
-            deck-label (element "label" "deck-label" "Deck")
-            deck-select (element "select" "deck-select" nil)
-            deck-export (button "Export current deck" "button secondary"
-                                export-current-deck!)]
-        (set! (.-type picker) "file")
-        (set! (.-accept picker) ".json,application/json")
-        (doseq [name (deck-options)]
-          (let [option (element "option" nil name)]
-            (set! (.-value option) name)
-            (append! deck-select option)))
-        (set! (.-value deck-select) (:current-deck @app-state))
-        (.addEventListener deck-select "change"
-                           #(set-ui! {:current-deck (.. % -target -value)
-                                      :selected-id nil :revealed? false
-                                      :draft-deck ""}))
-        (append! deck-label deck-select)
-        (.addEventListener picker "change"
-                           (fn [event]
-                             (import! (aget (.. event -target -files) 0))
-                             (set! (.-value picker) "")))
-        (append! bar (button "Export backup" "button secondary" export!)
-                 deck-export deck-label (deck-name-field)
-                 (button "New deck" "button secondary"
-                         #(create-deck! (:draft-deck @app-state)))
-                 (button "Rename deck" "button secondary"
-                         #(rename-deck! (:draft-deck @app-state)))
-                 import-button picker)))
-    (when (and (cloud/configured?) (:user @app-state))
-      (when (pos? (:legacy-count @app-state))
-        (append! bar (button (str "Move " (:legacy-count @app-state)
-                                  " browser cards")
-                             "button secondary" migrate-browser-cards!)))
-      (append! bar
-               (element "span" "account-email" (get-in @app-state [:user :email]))
-               (button "Sign out" "button secondary" sign-out!)))
+      (if manage?
+        (append! bar (nav-link "Back to study" "#study"))
+        (append! bar (deck-picker) (nav-link "Manage decks" "#manage-decks"))))
     bar))
+
+(defn deck-action-form [title description field-label placeholder draft-key action-label action!]
+  (let [form (element "form" "management-panel" nil)
+        label (element "label" "management-label" field-label)
+        input (element "input" nil nil)
+        submit (element "button" "button" action-label)]
+    (set! (.-type input) "text")
+    (set! (.-maxLength input) 100)
+    (set! (.-required input) true)
+    (set! (.-placeholder input) placeholder)
+    (set! (.-value input) (get @app-state draft-key))
+    (set! (.-type submit) "submit")
+    (set! (.-disabled submit) (boolean (:busy? @app-state)))
+    (.addEventListener input "input"
+                       #(swap! app-state assoc draft-key (.. % -target -value)))
+    (.addEventListener form "submit"
+                       (fn [event]
+                         (.preventDefault event)
+                         (action! (.-value input))))
+    (append! label input)
+    (append! form (element "h2" nil title)
+             (element "p" "format-hint" description) label submit)
+    form))
+
+(defn manage-decks-page []
+  (let [page (element "div" "management-page" nil)
+        intro (element "div" "management-intro" nil)
+        grid (element "div" "management-grid" nil)
+        current (element "section" "management-panel" nil)
+        backups (element "section" "management-panel" nil)
+        picker (element "input" "file-input" nil)]
+    (append! intro (element "h2" nil "Manage decks")
+             (element "p" "subtitle" "Organize decks and keep a copy of your cards."))
+    (append! current (element "h2" nil "Selected deck")
+             (deck-picker)
+             (element "p" "format-hint deck-count"
+                      (str (count (selected-deck-cards)) " cards in this deck.")))
+    (let [reason (delete-deck-blocked-reason)
+          delete-button (button "Delete selected deck" "button secondary" delete-deck!)]
+      (set! (.-disabled delete-button) (boolean (or reason (:busy? @app-state))))
+      (append! current
+               (element "p" "format-hint"
+                        (or reason "Only empty decks can be deleted. Cards are never deleted."))
+               delete-button))
+    (append! grid (deck-action-form "Create a deck" "Start a new, empty deck."
+                                    "New deck name" "Name your new deck"
+                                    :draft-new-deck "Create deck" create-deck!)
+             (deck-action-form "Rename selected deck"
+                               (str "Change the name of " (:current-deck @app-state) ".")
+                               "New name for selected deck" "Enter a different name"
+                               :draft-rename-deck "Rename deck" rename-deck!))
+    (set! (.-type picker) "file")
+    (set! (.-accept picker) ".json,application/json")
+    (.addEventListener picker "change"
+                       (fn [event]
+                         (import! (aget (.. event -target -files) 0))
+                         (set! (.-value picker) "")))
+    (append! backups (element "h2" nil "Backups"))
+    (append! backups (element "p" "format-hint"
+                              "Download all cards or only the selected deck. Import a JSON backup to restore cards."))
+    (let [actions (element "div" "management-actions" nil)]
+      (append! actions (button "Export selected deck" "button secondary" export-current-deck!)
+               (button "Export all cards" "button secondary" export!)
+               (button "Import backup" "button secondary" #(.click picker)))
+      (append! backups actions picker))
+    (when (and (cloud/configured?) (:user @app-state))
+      (let [account (element "section" "management-panel" nil)]
+        (append! account (element "h2" nil "Account")
+                 (element "p" "account-email" (get-in @app-state [:user :email])))
+        (when (pos? (:legacy-count @app-state))
+          (append! account (button (str "Move " (:legacy-count @app-state)
+                                        " browser cards")
+                                   "button secondary" migrate-browser-cards!)))
+        (append! account (button "Sign out" "button secondary" sign-out!))
+        (append! page intro current grid backups account)))
+    (when-not (and (cloud/configured?) (:user @app-state))
+      (append! page intro current grid backups))
+    page))
 
 (defn login-form []
   (let [form (element "form" "login-form" nil)
@@ -791,6 +895,7 @@
 (defn render! []
   (let [root (.getElementById js/document "app")
         {:keys [cards message storage-error user auth-loading?]} @app-state
+        manage? (= "#manage-decks" (.-hash js/location))
         header (element "header" "site-header" nil)
         layout (element "div" "layout" nil)
         study-column (element "div" "study-column" nil)]
@@ -798,8 +903,11 @@
     (append! header (element "div" nil nil))
     (append! (.-firstChild header)
              (element "h1" nil "SRS Cards")
-             (element "p" "subtitle" "Study a card, reveal its answer, then rate your recall."))
-    (append! header (toolbar))
+             (element "p" "subtitle"
+                      (if manage?
+                        "Keep your decks and backups organized."
+                        "Study a card, reveal its answer, then rate your recall.")))
+    (append! header (toolbar manage?))
     (append! root header)
     (when-not (cloud/configured?)
       (append! root
@@ -813,6 +921,8 @@
       (append! root (element "p" "empty" "Loading your account..."))
       (and (cloud/configured?) (not user))
       (append! root (login-form))
+      manage?
+      (append! root (manage-decks-page))
       :else
       (let [card (current-card)]
         (append! study-column (card-view card))
@@ -836,7 +946,8 @@
 (defn handle-key! [event]
   (let [tag (.. event -target -tagName)
         typing? (contains? #{"INPUT" "TEXTAREA" "SELECT"} tag)]
-    (when (and (not typing?) (not (.-repeat event)))
+    (when (and (not= "#manage-decks" (.-hash js/location))
+               (not typing?) (not (.-repeat event)))
       (cond
         (and (= (.-code event) "Space") (current-card)
              (not (:revealed? @app-state)))
@@ -852,6 +963,7 @@
     (.removeItem js/localStorage old-storage-key)
     (catch :default _ nil))
   (.addEventListener js/document "keydown" handle-key!)
+  (.addEventListener js/window "hashchange" render!)
   (when (cloud/configured?)
     (cloud/listen-auth! auth-changed!))
   (render!))
