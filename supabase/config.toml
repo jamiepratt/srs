@@ -1,5 +1,5 @@
 project_id = "srs"
 
 [auth]
-site_url = "https://jamiepratt.github.io/srs/"
-additional_redirect_urls = ["http://localhost:8765/"]
+site_url = "https://srs.submergedstructure.com/"
+additional_redirect_urls = ["https://jamiepratt.github.io/srs/", "http://localhost:8765/"]

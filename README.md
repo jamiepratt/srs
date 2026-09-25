@@ -30,7 +30,7 @@ npm run build
 
 Serve the `docs/` directory with a local HTTP server to use it. GitHub Pages
 publishes the `main` branch's `/docs` directory at
-[jamiepratt.github.io/srs](https://jamiepratt.github.io/srs/). The built
+[srs.submergedstructure.com](https://srs.submergedstructure.com/). The built
 JavaScript is committed so Pages does not need to run ClojureScript tooling.
 
 ## User accounts and storage
