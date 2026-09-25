@@ -52,6 +52,7 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .grammar-xray { border-top: 1px solid #dfe8df; margin-top: 20px; padding-top: 16px; }
 .grammar-xray-title { color: #5c745f; font-size: .48em; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .grammar-phrase { font-size: .82em; line-height: 1.8; margin-top: 8px; }
+.grammar-translation { color: #62736a; font-size: .65em; line-height: 1.45; margin: 0 0 10px; white-space: normal; }
 .grammar-token { display: inline-block; white-space: nowrap; font-weight: 700; }
 .grammar-token sup { font-size: .52em; font-weight: 400; margin-left: 2px; vertical-align: super; }
 .grammar-focus { background: #fff1a8; border: 2px solid #433900; border-radius: 6px; padding: 0 3px; }
