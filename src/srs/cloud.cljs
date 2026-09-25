@@ -62,6 +62,10 @@
         query (js-invoke table "insert" #js [#js {:user_id user-id :name name}])]
     (js-invoke query "select" "name")))
 
+(defn rename-deck! [old-name new-name]
+  (js-invoke client "rpc" "rename_deck"
+             #js {:old_name old-name :new_name new-name}))
+
 (defn error-message [result]
   (some-> result (aget "error") (aget "message")))
 

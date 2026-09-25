@@ -43,11 +43,12 @@ stale review updates from another device.
 
 The FSRS-6 schedule stores its version and learning step alongside stability,
 difficulty, due time, and review counts. Each card also stores its deck. Existing
-cards are in the Default deck. **Export backup** includes all cards; **Export
-current deck** includes only cards in the selected deck. Both exports preserve
-the schedule and review history. The FSRS v4 cards were deleted during
-the FSRS-6 upgrade because their memory values are incompatible. Browser
-storage and JSON backups use version 2; older cards and backups are ignored.
+cards are in the Default deck. The shared deck-name field works with **New deck**
+and **Rename deck**. **Export backup** includes all cards; **Export current deck**
+includes only cards in the selected deck and records its name even when empty.
+Both exports preserve the schedule and review history. The FSRS v4 cards were
+deleted during the FSRS-6 upgrade because their memory values are incompatible.
+Browser storage and JSON backups use version 2; older cards and backups are ignored.
 
 The [SRS Supabase project](https://supabase.com/dashboard/project/dvnddujfsmtwhfelfpdc)
 is in Frankfurt. Its migration is applied. `supabase/config.toml` holds the

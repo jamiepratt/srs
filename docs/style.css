@@ -30,9 +30,9 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .deck-label { display: inline-flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 650; }
 .deck-select { min-width: 120px; max-width: 220px; padding: 9px 10px; border: 1px solid #bdcfc1; border-radius: 9px; background: #fff; color: #20312c; }
 .deck-select:focus-visible { outline: 2px solid #367954; outline-offset: 1px; }
-.new-deck-form { display: inline-flex; align-items: end; gap: 6px; }
-.new-deck-form label { display: grid; gap: 3px; font-size: .75rem; font-weight: 650; }
-.new-deck-form input { width: 150px; padding: 9px 10px; border: 1px solid #bdcfc1; border-radius: 9px; }
+.deck-name-label { display: inline-flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 650; }
+.deck-name-label input { width: 170px; padding: 9px 10px; border: 1px solid #bdcfc1; border-radius: 9px; }
+.deck-name-label input:focus-visible { outline: 2px solid #367954; outline-offset: 1px; }
 
 .account-email { align-self: center; color: #526b59; font-size: .88rem; }
 
