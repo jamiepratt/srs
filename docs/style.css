@@ -40,6 +40,8 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .eyebrow { color: #5c745f; font-size: .78rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; margin: 0 0 22px; }
 
 .card-text { font-size: clamp(1.4rem, 3vw, 2.2rem); line-height: 1.35; white-space: pre-wrap; overflow-wrap: anywhere; }
+.card-text img { max-width: 100%; height: auto; }
+.card-text pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .answer { width: 100%; border-top: 1px solid #dfe8df; margin-top: 30px; padding-top: 26px; }
 
@@ -78,6 +80,7 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .add-form textarea { display: block; width: 100%; margin-top: 6px; padding: 10px; border: 1px solid #bdcfc1; border-radius: 9px; resize: vertical; min-height: 58px; }
 
 .add-form textarea:focus-visible { outline: 2px solid #367954; outline-offset: 1px; }
+.format-hint { color: #62736a; font-size: .82rem; margin: 0 0 14px; }
 
 .card-list { max-height: 360px; overflow: auto; }
 

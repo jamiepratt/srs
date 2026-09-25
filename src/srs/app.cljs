@@ -248,6 +248,28 @@
     (when content (set! (.-textContent node) content))
     node))
 
+(defn card-fragment [content]
+  (.sanitize js/DOMPurify content
+             #js {:USE_PROFILES #js {:html true}
+                  :RETURN_DOM_FRAGMENT true
+                  :FORBID_TAGS #js ["form" "input" "button" "textarea" "select" "option"]
+                  :FORBID_ATTR #js ["style"]}))
+
+(defn card-text [content]
+  (let [node (element "div" "card-text" nil)]
+    (.appendChild node (card-fragment content))
+    node))
+
+(defn card-summary [content]
+  (let [fragment (card-fragment content)]
+    (doseq [line-break (array-seq (.querySelectorAll fragment "br"))]
+      (.replaceWith line-break (.createTextNode js/document " ")))
+    (doseq [block (array-seq (.querySelectorAll fragment "p, div, li, h1, h2, h3, h4, h5, h6, blockquote"))]
+      (.before block (.createTextNode js/document " "))
+      (.after block (.createTextNode js/document " ")))
+    (let [summary (str/trim (str/replace (.-textContent fragment) #"\s+" " "))]
+      (if (seq summary) summary "Untitled card"))))
+
 (defn append! [parent & children]
   (doseq [child children]
     (when child (.appendChild parent child)))
@@ -427,7 +449,9 @@
                          (make-card! (.-value front) (.-value back))))
     (append! front-label front)
     (append! back-label back)
-    (append! form title front-label back-label submit)))
+    (append! form title front-label back-label
+             (element "p" "format-hint" "HTML fragments are supported. Scripts and unsafe attributes are removed.")
+             submit)))
 
 (defn card-view [card]
   (let [panel (element "section" "study-card" nil)]
@@ -436,14 +460,14 @@
             label (element "p" "eyebrow"
                            (str (if (due? card) "Due now" "Review early")
                                 " · " (name (get-in card [:schedule :state]))))
-            front (element "div" "card-text" (:front card))
+            front (card-text (:front card))
             due (element "p" "due" (str "Scheduled: " (date-label card)))]
         (append! panel label front)
         (if revealed?
           (let [answer (element "div" "answer" nil)
                 buttons (element "div" "ratings" nil)]
             (append! answer (element "p" "eyebrow" "Answer")
-                     (element "div" "card-text" (:back card)))
+                     (card-text (:back card)))
             (doseq [[rating label] (map vector ratings
                                         ["1 Again" "2 Hard" "3 Good" "4 Easy"])]
               (append! buttons
@@ -467,7 +491,7 @@
     (append! panel (element "h2" nil (str "Cards · " (count cards))))
     (doseq [card cards]
       (append! panel
-               (button (str (:front card) (if (due? card) " · due" ""))
+               (button (str (card-summary (:front card)) (if (due? card) " · due" ""))
                        (str "list-card" (when (= selected-id (:id card)) " selected"))
                        #(set-ui! {:selected-id (:id card) :revealed? false}))))
     panel))

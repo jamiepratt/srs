@@ -16,6 +16,11 @@ The card viewer is written in ClojureScript. It shows the front and back of a
 card, records one of the four FSRS ratings, and selects the next due card. It
 also lets you add cards and export or import a JSON backup.
 
+Card fronts and backs accept HTML fragments such as `<strong>`, lists, links,
+and images. HTML is sanitized when displayed; scripts and unsafe attributes are
+removed. Plain text and line breaks continue to display normally. The card
+list shows text extracted from each front.
+
 Build the static site with:
 
 ```sh

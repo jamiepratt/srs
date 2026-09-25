@@ -2,7 +2,7 @@
   "name": "srs-cards",
   "private": true,
   "scripts": {
-    "build": "cp node_modules/@supabase/supabase-js/dist/umd/supabase.js docs/js/supabase.js && cp node_modules/@supabase/supabase-js/LICENSE docs/js/supabase.LICENSE && shadow-cljs release app",
+    "build": "cp node_modules/@supabase/supabase-js/dist/umd/supabase.js docs/js/supabase.js && cp node_modules/@supabase/supabase-js/LICENSE docs/js/supabase.LICENSE && cp node_modules/dompurify/dist/purify.min.js docs/js/purify.min.js && cp node_modules/dompurify/LICENSE docs/js/purify.LICENSE && shadow-cljs release app",
     "watch": "shadow-cljs watch app"
   },
   "devDependencies": {
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@js-joda/core": "^6.1.0",
-    "@supabase/supabase-js": "^2.117.2"
+    "@supabase/supabase-js": "^2.117.2",
+    "dompurify": "^3.4.16"
   }
 }
