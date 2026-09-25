@@ -1,0 +1,5 @@
+project_id = "srs"
+
+[auth]
+site_url = "https://jamiepratt.github.io/srs/"
+additional_redirect_urls = ["http://localhost:8765/"]
