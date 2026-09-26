@@ -72,6 +72,9 @@ test("song audio starts per card and deck, can replay, and stops off the card", 
     "Noc Komety": { noc: "audio/noc-komety/noc.mp3", kometa: "audio/noc-komety/kometa.mp3" },
     "Takie tango": { noc: "audio/takie-tango/noc.mp3" },
   };
+  w.SRS_CARD_BACK_AUDIO = {
+    "Noc Komety": { noc: "audio/noc-komety-phrases/phrase.mp3" },
+  };
   const players = [];
   w.Audio = class {
     constructor(src) {
@@ -89,20 +92,24 @@ test("song audio starts per card and deck, can replay, and stops off the card", 
   assert.equal(players[0].plays, 1);
   button(w, "Show answer · Space").click();
   assert.equal(players[0].plays, 1);
-  button(w, "Play pronunciation").click();
-  assert.equal(players[0].plays, 2);
-  button(w, "kometa · due").click();
   assert.equal(players[0].pauses, 1);
+  assert.equal(button(w, "Play pronunciation"), undefined);
+  assert.equal(players[1].src, "audio/noc-komety-phrases/phrase.mp3");
   assert.equal(players[1].plays, 1);
+  button(w, "Play song phrase").click();
+  assert.equal(players[1].plays, 2);
+  button(w, "kometa · due").click();
+  assert.equal(players[1].pauses, 1);
+  assert.equal(players[2].plays, 1);
   const deck = w.document.querySelector("select");
   deck.value = "Takie tango";
   deck.dispatchEvent(new w.Event("change"));
-  assert.equal(players[1].pauses, 1);
-  assert.equal(players[2].src, "audio/takie-tango/noc.mp3");
-  assert.equal(players[2].plays, 1);
+  assert.equal(players[2].pauses, 1);
+  assert.equal(players[3].src, "audio/takie-tango/noc.mp3");
+  assert.equal(players[3].plays, 1);
   w.location.hash = "#manage-decks";
   w.dispatchEvent(new w.Event("hashchange"));
-  assert.equal(players[2].pauses, 1);
+  assert.equal(players[3].pauses, 1);
   w.close();
 });
 test("editing persists both sides while retaining schedule and history, and sanitizes display", () => {

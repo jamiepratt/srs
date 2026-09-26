@@ -722,6 +722,11 @@
           (aget (:deck card))
           (aget (:front card))))
 
+(defn card-back-audio-path [card]
+  (some-> (aget js/window "SRS_CARD_BACK_AUDIO")
+          (aget (:deck card))
+          (aget (:front card))))
+
 (defn play-card-audio! []
   (when-let [player (:player @card-audio)]
     (try
@@ -730,9 +735,10 @@
         (.catch playing (fn [_] nil)))
       (catch :default _ nil))))
 
-(defn sync-card-audio! [card]
-  (let [path (card-audio-path card)
-        key (when path [(:id card) (:front card)])]
+(defn sync-card-audio! [card revealed?]
+  (let [back-path (when revealed? (card-back-audio-path card))
+        path (or back-path (card-audio-path card))
+        key (when path [(:id card) (:front card) (if back-path :back :front)])]
     (when (not= key (:key @card-audio))
       (when-let [old-player (:player @card-audio)]
         (.pause old-player))
@@ -1284,7 +1290,8 @@
             front (card-text (:front card))
             due (element "p" "due" (str "Scheduled: " (date-label card)))]
         (append! panel label front)
-        (when (card-audio-path card)
+        (when (and (card-audio-path card)
+                   (or (not revealed?) (not (card-back-audio-path card))))
           (append! panel
                    (button "Play pronunciation" "button secondary audio-replay"
                            play-card-audio!)))
@@ -1293,6 +1300,10 @@
                 buttons (element "div" "ratings" nil)]
             (append! answer (element "p" "eyebrow" "Answer")
                      (card-text (:back card)))
+            (when (card-back-audio-path card)
+              (append! answer
+                       (button "Play song phrase" "button secondary audio-replay"
+                               play-card-audio!)))
             (doseq [[rating label] (map vector ratings
                                         ["1 Again" "2 Hard" "3 Good" "4 Easy"])]
               (append! buttons
@@ -1431,7 +1442,8 @@
      (when (and (not storage-error) (not manage?)
                 (or (not (cloud/configured?)) (and user (not auth-loading?)))
                 (not (:editing @app-state)))
-       (current-card)))))
+       (current-card))
+     (:revealed? @app-state))))
 
 (defn handle-key! [event]
   (let [tag (.. event -target -tagName)
