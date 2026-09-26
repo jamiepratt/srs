@@ -2,9 +2,9 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { JSDOM } = require("jsdom");
 const fs = require("node:fs");
-function app(decks = ["Default", "Unused"], client) {
+function app(decks = ["Default", "Unused"], client, url = "https://example.test/#manage-decks") {
   const dom = new JSDOM('<div id="app"></div>', {
-    url: "https://example.test/#manage-decks",
+    url,
     runScripts: "dangerously",
   });
   if (client) {
@@ -38,6 +38,22 @@ function select(w, name) {
   s.value = name;
   s.dispatchEvent(new w.Event("change"));
 }
+test("selected deck is in the URL and restored on reload", () => {
+  const w = app(["Default", "French words"]);
+  select(w, "French words");
+  assert.equal(new URL(w.location.href).searchParams.get("deck"), "French words");
+  assert.equal(w.location.hash, "#manage-decks");
+  const reloaded = app(["Default", "French words"], undefined, w.location.href);
+  assert.equal(reloaded.document.querySelector("select").value, "French words");
+  reloaded.close();
+  w.close();
+});
+test("invalid URL deck falls back to an available deck", () => {
+  const w = app(["Default"], undefined, "https://example.test/?deck=Gone#manage-decks");
+  assert.equal(w.document.querySelector("select").value, "Default");
+  assert.equal(new URL(w.location.href).searchParams.get("deck"), "Default");
+  w.close();
+});
 test("delete empty deck requires confirmation, persists and selects remaining deck", () => {
   const w = app();
   select(w, "Unused");
@@ -138,6 +154,13 @@ test("cloud deletion calls authenticated RPC and refreshes selected deck", async
     ["Default"],
   );
   assert.equal(w.document.querySelector("select").value, "Default");
+  w.close();
+});
+test("cloud deck from URL survives account loading", async () => {
+  const w = app(undefined, cloudClient(), "https://example.test/?deck=Unused#manage-decks");
+  await settle();
+  assert.equal(w.document.querySelector("select").value, "Unused");
+  assert.equal(new URL(w.location.href).searchParams.get("deck"), "Unused");
   w.close();
 });
 test("cloud rejection preserves deck and reports why", async () => {

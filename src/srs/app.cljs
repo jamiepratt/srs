@@ -101,6 +101,9 @@
   (let [options (available-decks decks cards)]
     (if (some #{current} options) current (first options))))
 
+(defn url-deck []
+  (.get (.-searchParams (js/URL. (.-href js/location))) "deck"))
+
 (defn legacy-count []
   (try
     (count (browser-cards))
@@ -109,7 +112,7 @@
 (defn initial-state []
   (if (cloud/configured?)
     {:cards [] :user nil :auth-loading? true :busy? false
-     :decks ["Default"] :shared-decks [] :current-deck "Default"
+     :decks ["Default"] :shared-decks [] :current-deck (or (url-deck) "Default")
      :legacy-count (legacy-count) :selected-id nil :revealed? false
      :export-scheduling? true
      :pending-import nil :import-destination "" :import-new-deck ""
@@ -119,7 +122,7 @@
       (let [cards (or (browser-cards) [])
             decks (or (browser-decks) ["Default"])]
         {:cards cards :decks decks :shared-decks []
-         :current-deck (valid-current-deck "Default" decks cards)
+         :current-deck (valid-current-deck (url-deck) decks cards)
          :selected-id nil :revealed? false
          :export-scheduling? true
          :pending-import nil :import-destination "" :import-new-deck ""
@@ -135,14 +138,25 @@
          :storage-error (str "Could not read saved cards: " (.-message error))}))))
 
 (defonce app-state (atom (initial-state)))
-(declare render! choose-next-id)
+(declare render! choose-next-id sync-deck-url!)
 
 (defn set-ui! [changes]
   (swap! app-state merge changes)
+  (sync-deck-url!)
   (render!))
 
 (defn deck-options []
   (available-decks (:decks @app-state) (:cards @app-state)))
+
+(defn sync-deck-url! []
+  (when (and (or (not (cloud/configured?))
+                 (and (:user @app-state) (not (:auth-loading? @app-state))))
+             (some #{(:current-deck @app-state)} (deck-options)))
+    (let [url (js/URL. (.-href js/location))
+          deck (:current-deck @app-state)]
+      (when (not= deck (.get (.-searchParams url) "deck"))
+        (.set (.-searchParams url) "deck" deck)
+        (.replaceState js/history nil "" (.-href url))))))
 
 (defn selected-deck-cards []
   (filterv #(= (:current-deck @app-state) (:deck %))
@@ -234,7 +248,7 @@
       (when (not= user-id (get-in @app-state [:user :id]))
         (set-ui! {:user {:id user-id :email (aget user "email")}
                   :cards [] :decks ["Default"] :shared-decks []
-                  :current-deck "Default"
+                  :current-deck (or (url-deck) "Default")
                   :editing nil :busy? false :selected-id nil :revealed? false
                   :pending-import nil :import-destination "" :import-new-deck ""
                   :auth-loading? true :message nil :account-deletion-message nil})
@@ -1443,4 +1457,5 @@
   (.addEventListener js/window "hashchange" #(set-ui! {:editing nil}))
   (when (cloud/configured?)
     (cloud/listen-auth! auth-changed!))
+  (sync-deck-url!)
   (render!))
