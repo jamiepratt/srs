@@ -54,6 +54,47 @@ test("card controls and add form start collapsed in the sidebar", async () => {
   assert.equal(w.document.querySelector(".add-card-panel").open, true);
   w.close();
 });
+test("Noc Komety audio starts for each new front, can replay, and stops off the card", () => {
+  const seed = app();
+  const saved = JSON.parse(seed.localStorage.getItem(key));
+  seed.close();
+  saved.cards[0].front = "noc";
+  saved.cards[0].deck = "Noc Komety";
+  saved.cards.push({ ...saved.cards[0], id: "second-card", front: "kometa" });
+  const w = new JSDOM('<div id="app"></div>', {
+    url: "https://example.test/#study",
+    runScripts: "dangerously",
+  }).window;
+  w.localStorage.setItem(key, JSON.stringify(saved));
+  w.localStorage.setItem("jamiepratt.srs.decks.v1", JSON.stringify(["Noc Komety"]));
+  w.SRS_CARD_AUDIO = { noc: "audio/noc-komety/noc.mp3", kometa: "audio/noc-komety/kometa.mp3" };
+  const players = [];
+  w.Audio = class {
+    constructor(src) {
+      this.src = src;
+      this.plays = 0;
+      this.pauses = 0;
+      players.push(this);
+    }
+    play() { this.plays++; return Promise.resolve(); }
+    pause() { this.pauses++; }
+  };
+  w.eval(fs.readFileSync("docs/js/purify.min.js", "utf8"));
+  w.eval(fs.readFileSync("docs/js/main.js", "utf8"));
+  assert.equal(players.length, 1);
+  assert.equal(players[0].plays, 1);
+  button(w, "Show answer · Space").click();
+  assert.equal(players[0].plays, 1);
+  button(w, "Play pronunciation").click();
+  assert.equal(players[0].plays, 2);
+  button(w, "kometa · due").click();
+  assert.equal(players[0].pauses, 1);
+  assert.equal(players[1].plays, 1);
+  w.location.hash = "#manage-decks";
+  w.dispatchEvent(new w.Event("hashchange"));
+  assert.equal(players[1].pauses, 1);
+  w.close();
+});
 test("editing persists both sides while retaining schedule and history, and sanitizes display", () => {
   const w = app();
   button(w, "Show answer · Space").click();

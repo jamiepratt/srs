@@ -700,6 +700,33 @@
     (.appendChild node (card-fragment content))
     node))
 
+(defonce card-audio (atom {:key nil :player nil}))
+
+(defn card-audio-path [card]
+  (when (= "Noc Komety" (:deck card))
+    (some-> (aget js/window "SRS_CARD_AUDIO")
+            (aget (:front card)))))
+
+(defn play-card-audio! []
+  (when-let [player (:player @card-audio)]
+    (try
+      (set! (.-currentTime player) 0)
+      (when-let [playing (.play player)]
+        (.catch playing (fn [_] nil)))
+      (catch :default _ nil))))
+
+(defn sync-card-audio! [card]
+  (let [path (card-audio-path card)
+        key (when path [(:id card) (:front card)])]
+    (when (not= key (:key @card-audio))
+      (when-let [old-player (:player @card-audio)]
+        (.pause old-player))
+      (if path
+        (let [player (js/Audio. path)]
+          (reset! card-audio {:key key :player player})
+          (play-card-audio!))
+        (reset! card-audio {:key nil :player nil})))))
+
 (defn card-summary [content]
   (let [fragment (card-fragment content)]
     (doseq [line-break (array-seq (.querySelectorAll fragment "br"))]
@@ -1198,6 +1225,10 @@
             front (card-text (:front card))
             due (element "p" "due" (str "Scheduled: " (date-label card)))]
         (append! panel label front)
+        (when (card-audio-path card)
+          (append! panel
+                   (button "Play pronunciation" "button secondary audio-replay"
+                           play-card-audio!)))
         (if revealed?
           (let [answer (element "div" "answer" nil)
                 buttons (element "div" "ratings" nil)]
@@ -1336,11 +1367,16 @@
                             (str (count (selected-deck-cards)) " cards in "
                                  (:current-deck @app-state) "; " (count cards)
                                  " total saved in this browser. "
-                                 "Export a backup before clearing browser data or switching devices."))))))))
+                                 "Export a backup before clearing browser data or switching devices."))))))
+    (sync-card-audio!
+     (when (and (not storage-error) (not manage?)
+                (or (not (cloud/configured?)) (and user (not auth-loading?)))
+                (not (:editing @app-state)))
+       (current-card)))))
 
 (defn handle-key! [event]
   (let [tag (.. event -target -tagName)
-        typing? (contains? #{"INPUT" "TEXTAREA" "SELECT"} tag)]
+        typing? (contains? #{"INPUT" "TEXTAREA" "SELECT" "BUTTON"} tag)]
     (when (and (not= "#manage-decks" (.-hash js/location))
                (not typing?) (not (:editing @app-state)) (not (:busy? @app-state))
                (not (.-repeat event)))
