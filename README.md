@@ -93,7 +93,7 @@ x-ray key below the card.
 
 Song card fronts have generated pronunciation audio. Each front plays when
 shown, and **Play pronunciation** replays it. Noc Komety also plays its Polish
-song phrase when the answer is revealed; **Play song phrase** replays it.
+song phrase when the answer is revealed; both replay buttons remain available.
 Browsers may block automatic audio
 on the first page load until the user interacts with the page. The MP3 files and
 front-to-file manifest live in `docs/audio/`. To regenerate them from an exported
