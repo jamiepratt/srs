@@ -54,20 +54,24 @@ test("card controls and add form start collapsed in the sidebar", async () => {
   assert.equal(w.document.querySelector(".add-card-panel").open, true);
   w.close();
 });
-test("Noc Komety audio starts for each new front, can replay, and stops off the card", () => {
+test("song audio starts per card and deck, can replay, and stops off the card", () => {
   const seed = app();
   const saved = JSON.parse(seed.localStorage.getItem(key));
   seed.close();
   saved.cards[0].front = "noc";
   saved.cards[0].deck = "Noc Komety";
   saved.cards.push({ ...saved.cards[0], id: "second-card", front: "kometa" });
+  saved.cards.push({ ...saved.cards[0], id: "third-card", deck: "Takie tango" });
   const w = new JSDOM('<div id="app"></div>', {
     url: "https://example.test/#study",
     runScripts: "dangerously",
   }).window;
   w.localStorage.setItem(key, JSON.stringify(saved));
-  w.localStorage.setItem("jamiepratt.srs.decks.v1", JSON.stringify(["Noc Komety"]));
-  w.SRS_CARD_AUDIO = { noc: "audio/noc-komety/noc.mp3", kometa: "audio/noc-komety/kometa.mp3" };
+  w.localStorage.setItem("jamiepratt.srs.decks.v1", JSON.stringify(["Noc Komety", "Takie tango"]));
+  w.SRS_CARD_AUDIO = {
+    "Noc Komety": { noc: "audio/noc-komety/noc.mp3", kometa: "audio/noc-komety/kometa.mp3" },
+    "Takie tango": { noc: "audio/takie-tango/noc.mp3" },
+  };
   const players = [];
   w.Audio = class {
     constructor(src) {
@@ -90,9 +94,15 @@ test("Noc Komety audio starts for each new front, can replay, and stops off the 
   button(w, "kometa · due").click();
   assert.equal(players[0].pauses, 1);
   assert.equal(players[1].plays, 1);
+  const deck = w.document.querySelector("select");
+  deck.value = "Takie tango";
+  deck.dispatchEvent(new w.Event("change"));
+  assert.equal(players[1].pauses, 1);
+  assert.equal(players[2].src, "audio/takie-tango/noc.mp3");
+  assert.equal(players[2].plays, 1);
   w.location.hash = "#manage-decks";
   w.dispatchEvent(new w.Event("hashchange"));
-  assert.equal(players[1].pauses, 1);
+  assert.equal(players[2].pauses, 1);
   w.close();
 });
 test("editing persists both sides while retaining schedule and history, and sanitizes display", () => {

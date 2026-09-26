@@ -704,9 +704,9 @@
 (defonce card-audio (atom {:key nil :player nil}))
 
 (defn card-audio-path [card]
-  (when (= "Noc Komety" (:deck card))
-    (some-> (aget js/window "SRS_CARD_AUDIO")
-            (aget (:front card)))))
+  (some-> (aget js/window "SRS_CARD_AUDIO")
+          (aget (:deck card))
+          (aget (:front card))))
 
 (defn play-card-audio! []
   (when-let [player (:player @card-audio)]

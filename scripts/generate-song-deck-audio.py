@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate card-front audio from an exported Noc Komety deck.
+"""Generate card-front audio from an export of all four song decks.
 
-Run with: api-shell python3 scripts/generate-noc-komety-audio.py BACKUP.json
+Run with: api-shell python3 scripts/generate-song-deck-audio.py BACKUP.json
 """
 
 import json
@@ -15,9 +15,14 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "docs/audio/noc-komety"
-MANIFEST = ROOT / "docs/audio/noc-komety.js"
-POLISH_VOICE = "aAY9hMI6VU335JUszdRs"  # Aleksandra, native Polish
+OUTPUT = ROOT / "docs/audio"
+MANIFEST = OUTPUT / "song-decks.js"
+DECK_VOICES = {
+    "Noc Komety": ("noc-komety", "aAY9hMI6VU335JUszdRs"),  # Aleksandra
+    "Takie tango": ("takie-tango", "B9cNwbQXN3s6l3nU6fqz"),  # Adam
+    "Wszystko kwitnie wkoło": ("wszystko-kwitnie-wkolo", "C8ZVSJxcymeT86xT429O"),  # Luiza
+    "Zacznij od Bacha": ("zacznij-od-bacha", "Tq9w09mAjuFKRAZRcBR5"),  # Marek
+}
 ENGLISH_VOICE = "JBFqnCBsd6RMkjVDRZzb"  # George
 
 
@@ -48,21 +53,27 @@ def synthesize(text, voice_id, destination):
 
 def main():
     backup = json.loads(Path(sys.argv[1]).read_text())
-    if backup.get("deck_name") != "Noc Komety":
-        raise ValueError("Expected a Noc Komety deck export")
-    fronts = [card["front"] for card in backup["cards"]]
-    if len(fronts) != len(set(fronts)):
-        raise ValueError("Duplicate fronts need distinct audio filenames")
+    cards = backup["cards"]
+    decks = {card["deck"] for card in cards}
+    if decks != set(DECK_VOICES):
+        raise ValueError(f"Expected all four song decks, got {sorted(decks)}")
     OUTPUT.mkdir(parents=True, exist_ok=True)
     mapping = {}
-    for index, front in enumerate(fronts, 1):
-        filename = front + ".mp3"
-        destination = OUTPUT / filename
-        if not destination.exists():
-            voice = ENGLISH_VOICE if front == "Which FSRS version schedules these cards?" else POLISH_VOICE
-            synthesize(front, voice, destination)
-        mapping[front] = "audio/noc-komety/" + urllib.parse.quote(filename)
-        print(f"{index}/{len(fronts)} {front}", flush=True)
+    for deck, (slug, voice) in DECK_VOICES.items():
+        fronts = [card["front"] for card in cards if card["deck"] == deck]
+        if len(fronts) != len(set(fronts)):
+            raise ValueError(f"Duplicate fronts in {deck} need distinct audio filenames")
+        directory = OUTPUT / slug
+        directory.mkdir(exist_ok=True)
+        mapping[deck] = {}
+        for index, front in enumerate(fronts, 1):
+            filename = front + ".mp3"
+            destination = directory / filename
+            if not destination.exists():
+                selected_voice = ENGLISH_VOICE if front == "Which FSRS version schedules these cards?" else voice
+                synthesize(front, selected_voice, destination)
+            mapping[deck][front] = "audio/" + slug + "/" + urllib.parse.quote(filename)
+            print(f"{deck}: {index}/{len(fronts)} {front}", flush=True)
     MANIFEST.write_text("window.SRS_CARD_AUDIO = " + json.dumps(mapping, ensure_ascii=False, indent=2) + ";\n")
 
 

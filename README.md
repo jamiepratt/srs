@@ -91,11 +91,11 @@ Noc Komety, Takie tango, Wszystko kwitnie wkoło, and Zacznij od Bacha. Their
 song cards include annotated Polish phrases, English translations, and a grammar
 x-ray key below the card.
 
-Noc Komety card fronts have generated pronunciation audio. Each front plays when
+Song card fronts have generated pronunciation audio. Each front plays when
 shown, and **Play pronunciation** replays it. Browsers may block automatic audio
 on the first page load until the user interacts with the page. The MP3 files and
 front-to-file manifest live in `docs/audio/`. To regenerate them from an exported
-Noc Komety deck, run `api-shell python3 scripts/generate-noc-komety-audio.py
+backup of all song decks, run `api-shell python3 scripts/generate-song-deck-audio.py
 BACKUP.json`.
 
 Auth mail is sent through Resend as `SRS Cards <no-reply@submergedstructure.com>`.
