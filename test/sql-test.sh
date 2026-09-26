@@ -24,4 +24,5 @@ SQL
 for migration in supabase/migrations/*.sql; do psql -X -v ON_ERROR_STOP=1 -d "$db" -f "$migration" >/dev/null; done
 psql -X -v ON_ERROR_STOP=1 -d "$db" -f test/decks.sql
 psql -X -v ON_ERROR_STOP=1 -d "$db" -f test/shared-decks.sql
+psql -X -v ON_ERROR_STOP=1 -d "$db" -f test/account.sql
 python3 test/sql-races.py "$db"

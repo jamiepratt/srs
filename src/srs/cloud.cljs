@@ -32,6 +32,9 @@
 (defn sign-out! []
   (js-invoke (aget client "auth") "signOut"))
 
+(defn delete-account! []
+  (js-invoke client "rpc" "delete_account"))
+
 (defn list-cards! [offset]
   (let [table (js-invoke client "from" "cards")
         query (js-invoke table "select"

@@ -237,13 +237,14 @@
                   :current-deck "Default"
                   :editing nil :busy? false :selected-id nil :revealed? false
                   :pending-import nil :import-destination "" :import-new-deck ""
-                  :auth-loading? true :message nil})
+                  :auth-loading? true :message nil :account-deletion-message nil})
         (load-cloud! user-id)
         (load-shared-decks! user-id))
       (set-ui! {:user nil :cards [] :decks ["Default"] :shared-decks []
                 :current-deck "Default" :editing nil :selected-id nil :revealed? false
                 :pending-import nil :import-destination "" :import-new-deck ""
-                :auth-loading? false :busy? false :message nil}))))
+                :auth-loading? false :busy? false
+                :message (:account-deletion-message @app-state)}))))
 
 (defn create-cloud-card! [card]
   (when-not (:busy? @app-state)
@@ -839,6 +840,34 @@
                (set-ui! {:message (str "Sign-out failed: "
                                        (.-message error))})))))
 
+(defn delete-account! []
+  (when (and (:user @app-state) (not (:busy? @app-state))
+             (js/confirm "Delete your account and all cloud cards, decks, schedules and review history permanently? Export a backup first if you want to keep them."))
+    (let [email (get-in @app-state [:user :email])]
+      (when (= email (js/prompt (str "Type " email " to confirm account deletion:")))
+        (set-ui! {:busy? true})
+        (-> (cloud/delete-account!)
+            (.then (fn [result]
+                     (if-let [error (cloud/error-message result)]
+                       (set-ui! {:busy? false :message (str "Account deletion failed: " error)})
+                       (let [deleted-message "Your account was deleted."]
+                         (swap! app-state assoc :account-deletion-message deleted-message)
+                         (-> (cloud/sign-out!)
+                             (.then (fn [result]
+                                      (when (cloud/error-message result)
+                                        (swap! app-state assoc :account-deletion-message
+                                               "Your account was deleted. Clear this browser's site data if a session remains."))
+                                      (auth-changed! nil)
+                                      (set-ui! {:message (:account-deletion-message @app-state)}))
+                                    (fn [_]
+                                      (swap! app-state assoc :account-deletion-message
+                                             "Your account was deleted. Clear this browser's site data if a session remains.")
+                                      (auth-changed! nil)
+                                      (set-ui! {:message (:account-deletion-message @app-state)})))))))
+                   (fn [error]
+                     (set-ui! {:busy? false
+                               :message (str "Account deletion failed: " (.-message error))}))))))))
+
 (defn import! [file]
   (when file
     (let [reader (js/FileReader.)
@@ -1114,7 +1143,10 @@
           (append! account (button (str "Move " (:legacy-count @app-state)
                                         " browser cards")
                                    "button secondary" migrate-browser-cards!)))
-        (append! account (button "Sign out" "button secondary" sign-out!))
+        (let [actions (element "div" "management-actions" nil)]
+          (append! actions (button "Sign out" "button secondary" sign-out!)
+                   (button "Delete and close account" "button danger" delete-account!))
+          (append! account actions))
         (append! page intro current grid library backups account)))
     (when-not (and (cloud/configured?) (:user @app-state))
       (append! page intro current grid backups))
@@ -1124,22 +1156,35 @@
   (let [form (element "form" "login-form" nil)
         label (element "label" nil "Email address")
         input (element "input" nil nil)
+        terms-label (element "label" "terms-agreement" nil)
+        terms-check (element "input" nil nil)
+        terms-text (element "span" nil nil)
+        terms-link (element "a" nil "Terms of Service")
         submit (element "button" "button" "Send sign-in link")]
     (set! (.-type input) "email")
     (set! (.-required input) true)
     (set! (.-autocomplete input) "email")
+    (set! (.-type terms-check) "checkbox")
+    (set! (.-required terms-check) true)
+    (set! (.-href terms-link) "terms.html")
+    (set! (.-target terms-link) "_blank")
+    (set! (.-rel terms-link) "noopener")
     (set! (.-type submit) "submit")
     (set! (.-disabled submit) (boolean (:busy? @app-state)))
     (.addEventListener form "submit"
                        (fn [event]
                          (.preventDefault event)
-                         (send-magic-link! (.-value input))))
+                         (when (and (.-checked terms-check)
+                                    (.checkValidity input))
+                           (send-magic-link! (.-value input)))))
     (append! label input)
+    (append! terms-text (.createTextNode js/document "I agree to the ") terms-link)
+    (append! terms-label terms-check terms-text)
     (append! form
              (element "h2" nil "Sign in to your cards")
              (element "p" "subtitle"
                       "Enter your email. We'll send a link to open your cards on any device.")
-             label submit)
+             label terms-label submit)
     (when (pos? (:legacy-count @app-state))
       (append! form
                (button "Download old browser cards" "button secondary"

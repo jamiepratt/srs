@@ -46,6 +46,11 @@ The app uses Supabase Auth email links and a Postgres `cards` table. Each row
 contains one user's card text, FSRS scheduling state, and review history. Row
 level security limits reads and writes to that user. A `revision` field rejects
 stale reviews, edits, moves, and deletions from another device.
+Sending a sign-in link requires agreement to the public Terms of Service in
+`docs/terms.html`. Manage decks offers account deletion beside Sign out. It
+requires confirmation and the account email, then calls the authenticated
+`delete_account` database function to remove the auth user and cloud data.
+Migration `202609260002_delete_account.sql` provides the deletion function.
 
 The FSRS-6 schedule stores its version and learning step alongside stability,
 difficulty, due time, and review counts. Each card also stores its deck. Existing
