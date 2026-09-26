@@ -109,7 +109,7 @@
 (defn initial-state []
   (if (cloud/configured?)
     {:cards [] :user nil :auth-loading? true :busy? false
-     :decks ["Default"] :current-deck "Default"
+     :decks ["Default"] :shared-decks [] :current-deck "Default"
      :legacy-count (legacy-count) :selected-id nil :revealed? false
      :export-scheduling? true
      :pending-import nil :import-destination "" :import-new-deck ""
@@ -118,7 +118,7 @@
     (try
       (let [cards (or (browser-cards) [])
             decks (or (browser-decks) ["Default"])]
-        {:cards cards :decks decks
+        {:cards cards :decks decks :shared-decks []
          :current-deck (valid-current-deck "Default" decks cards)
          :selected-id nil :revealed? false
          :export-scheduling? true
@@ -126,7 +126,7 @@
          :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :storage-error nil :busy? false})
       (catch :default error
-        {:cards [] :decks ["Default"] :current-deck "Default"
+        {:cards [] :decks ["Default"] :shared-decks [] :current-deck "Default"
          :selected-id nil :revealed? false
          :export-scheduling? true
          :pending-import nil :import-destination "" :import-new-deck ""
@@ -216,17 +216,31 @@
 (defn load-cloud! [user-id]
   (load-cloud-page! user-id 0 []))
 
+(defn load-shared-decks! [user-id]
+  (-> (cloud/shared-decks!)
+      (.then (fn [result]
+               (when (= user-id (get-in @app-state [:user :id]))
+                 (if-let [error (cloud/error-message result)]
+                   (set-ui! {:message (str "Could not load shared decks: " error)})
+                   (set-ui! {:shared-decks (cloud/result-rows result)}))))
+             (fn [error]
+               (when (= user-id (get-in @app-state [:user :id]))
+                 (set-ui! {:message (str "Could not load shared decks: "
+                                         (.-message error))}))))))
+
 (defn auth-changed! [user]
   (let [user-id (some-> user (aget "id"))]
     (if user-id
       (when (not= user-id (get-in @app-state [:user :id]))
         (set-ui! {:user {:id user-id :email (aget user "email")}
-                  :cards [] :decks ["Default"] :current-deck "Default"
+                  :cards [] :decks ["Default"] :shared-decks []
+                  :current-deck "Default"
                   :editing nil :busy? false :selected-id nil :revealed? false
                   :pending-import nil :import-destination "" :import-new-deck ""
                   :auth-loading? true :message nil})
-        (load-cloud! user-id))
-      (set-ui! {:user nil :cards [] :decks ["Default"]
+        (load-cloud! user-id)
+        (load-shared-decks! user-id))
+      (set-ui! {:user nil :cards [] :decks ["Default"] :shared-decks []
                 :current-deck "Default" :editing nil :selected-id nil :revealed? false
                 :pending-import nil :import-destination "" :import-new-deck ""
                 :auth-loading? false :busy? false :message nil}))))
@@ -559,6 +573,78 @@
                             :message nil}))))
             (catch :default error
               (set-ui! {:message (str "Could not delete deck: " (.-message error))}))))))))
+
+(defn merge-deck! [target]
+  (let [source (:current-deck @app-state)]
+    (when (and (not (:busy? @app-state))
+               (some #{target} (deck-options)) (not= source target)
+               (js/confirm (str "Move all cards from \"" source "\" into \""
+                                target "\" and remove \"" source "\"?")))
+      (if (cloud/configured?)
+        (let [user-id (get-in @app-state [:user :id])]
+          (set-ui! {:busy? true})
+          (-> (cloud/merge-decks! source target)
+              (.then (fn [result]
+                       (when (= user-id (get-in @app-state [:user :id]))
+                         (if-let [error (cloud/error-message result)]
+                           (set-ui! {:busy? false
+                                     :message (str "Could not merge decks: " error)})
+                           (do
+                             (set-ui! {:current-deck target :selected-id nil
+                                       :revealed? false :busy? false :auth-loading? true
+                                       :merge-target "" :message nil})
+                             (load-cloud! user-id)))))
+                     (fn [error]
+                       (set-ui! {:busy? false
+                                 :message (str "Could not merge decks: "
+                                               (.-message error))})))))
+        (try
+          (let [cards (mapv #(if (= source (:deck %))
+                               (-> % (assoc :deck target) (update :revision inc)) %)
+                            (or (browser-cards) []))
+                decks (filterv #(not= source %) (deck-options))]
+            (.setItem js/localStorage storage-key (backup-json cards))
+            (.setItem js/localStorage decks-storage-key
+                      (.stringify js/JSON (clj->js decks)))
+            (set-ui! {:cards cards :decks decks :current-deck target
+                      :selected-id nil :revealed? false :merge-target ""
+                      :message nil}))
+          (catch :default error
+            (set-ui! {:message (str "Could not merge decks: "
+                                    (.-message error))})))))))
+
+(defn copy-name [name]
+  (let [taken (set (map str/lower-case (deck-options)))]
+    (if-not (contains? taken (str/lower-case name))
+      name
+      (loop [n 1]
+        (let [suffix (str " (copy " n ")")
+              candidate (str (subs name 0 (min (count name)
+                                               (- 100 (count suffix)))) suffix)]
+          (if (contains? taken (str/lower-case candidate))
+            (recur (inc n)) candidate))))))
+
+(defn copy-shared-deck-to-account! [{:keys [owner_id deck_name]}]
+  (when (and (:user @app-state) (not (:busy? @app-state)))
+    (let [user-id (get-in @app-state [:user :id])
+          target (copy-name deck_name)
+          schedule (:schedule (encode-card {:schedule (fsrs/new-card!)}))]
+      (set-ui! {:busy? true})
+      (-> (cloud/copy-shared-deck! owner_id deck_name target schedule)
+          (.then (fn [result]
+                   (when (= user-id (get-in @app-state [:user :id]))
+                     (if-let [error (cloud/error-message result)]
+                       (set-ui! {:busy? false
+                                 :message (str "Could not copy shared deck: " error)})
+                       (do
+                         (set-ui! {:busy? false :auth-loading? true
+                                   :current-deck target :selected-id nil
+                                   :revealed? false :message nil})
+                         (load-cloud! user-id)))))
+                 (fn [error]
+                   (set-ui! {:busy? false
+                             :message (str "Could not copy shared deck: "
+                                           (.-message error))})))))))
 
 (defn move-card! [card deck]
   (when (and (not (:busy? @app-state)) (not= deck (:deck card)))
@@ -910,6 +996,9 @@
         intro (element "div" "management-intro" nil)
         grid (element "div" "management-grid" nil)
         current (element "section" "management-panel" nil)
+        merge-panel (element "section" "management-panel" nil)
+        merge-label (element "label" "management-label" "Merge selected deck into")
+        merge-select (element "select" "merge-destination" nil)
         backups (element "section" "management-panel" nil)
         picker (element "input" "file-input" nil)]
     (append! intro (element "h2" nil "Manage decks")
@@ -932,6 +1021,28 @@
                                (str "Change the name of " (:current-deck @app-state) ".")
                                "New name for selected deck" "Enter a different name"
                                :draft-rename-deck "Rename deck" rename-deck!))
+    (doseq [name (remove #{(:current-deck @app-state)} (deck-options))]
+      (let [option (element "option" nil name)]
+        (set! (.-value option) name)
+        (append! merge-select option)))
+    (set! (.-value merge-select) (or (some #{(:merge-target @app-state)}
+                                           (map #(.-value %) (array-seq (.-options merge-select))))
+                                     (some-> merge-select .-firstChild .-value)
+                                     ""))
+    (.addEventListener merge-select "change"
+                       #(swap! app-state assoc :merge-target (.. % -target -value)))
+    (append! merge-label merge-select)
+    (let [submit (element "button" "button" "Merge decks")]
+      (set! (.-type submit) "button")
+      (set! (.-disabled submit) (or (:busy? @app-state)
+                                    (< (count (deck-options)) 2)))
+      (.addEventListener submit "click"
+                         #(merge-deck! (.-value merge-select)))
+      (append! merge-panel (element "h2" nil "Merge decks")
+               (element "p" "format-hint"
+                        "Move all cards into the chosen deck, then remove the selected deck. Review history stays with each card.")
+               merge-label submit))
+    (append! grid merge-panel)
     (set! (.-type picker) "file")
     (set! (.-accept picker) ".json,application/json")
     (.addEventListener picker "change"
@@ -957,7 +1068,19 @@
       (append! backups actions picker))
     (append! backups (import-destination-panel))
     (when (and (cloud/configured?) (:user @app-state))
-      (let [account (element "section" "management-panel" nil)]
+      (let [account (element "section" "management-panel" nil)
+            library (element "section" "management-panel" nil)]
+        (append! library (element "h2" nil "Shared decks")
+                 (element "p" "format-hint"
+                          "Copy a shared deck into your account. Your review schedule starts fresh and stays private."))
+        (doseq [shared (:shared-decks @app-state)]
+          (let [row (element "div" "shared-deck-row" nil)
+                title (element "span" nil
+                               (str (:deck_name shared) " · " (:card_count shared) " cards"))]
+            (append! row title
+                     (button "Copy deck" "button secondary"
+                             #(copy-shared-deck-to-account! shared)))
+            (append! library row)))
         (append! account (element "h2" nil "Account")
                  (element "p" "account-email" (get-in @app-state [:user :email])))
         (when (pos? (:legacy-count @app-state))
@@ -965,7 +1088,7 @@
                                         " browser cards")
                                    "button secondary" migrate-browser-cards!)))
         (append! account (button "Sign out" "button secondary" sign-out!))
-        (append! page intro current grid backups account)))
+        (append! page intro current grid library backups account)))
     (when-not (and (cloud/configured?) (:user @app-state))
       (append! page intro current grid backups))
     page))

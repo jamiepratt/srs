@@ -76,6 +76,18 @@
 (defn delete-deck! [name]
   (js-invoke client "rpc" "delete_deck" #js {:deck_name name}))
 
+(defn merge-decks! [source target]
+  (js-invoke client "rpc" "merge_decks"
+             #js {:source_name source :target_name target}))
+
+(defn shared-decks! []
+  (js-invoke client "rpc" "shared_deck_catalog"))
+
+(defn copy-shared-deck! [owner source target schedule]
+  (js-invoke client "rpc" "copy_shared_deck"
+             #js {:source_owner owner :source_name source
+                  :target_name target :new_schedule (clj->js schedule)}))
+
 (defn error-message [result]
   (some-> result (aget "error") (aget "message")))
 

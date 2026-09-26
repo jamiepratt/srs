@@ -54,6 +54,8 @@ cards are in the Default deck. The study screen keeps the deck selector. The
 backup and account actions. **Export all cards** includes all cards;
 **Export selected deck** includes only cards in the selected deck and records
 its name even when empty.
+**Merge decks** moves every card from the selected deck into another deck,
+preserving schedules and review history, then removes the selected deck.
 The export checkbox includes schedules and review history by default. Uncheck it
 to export card content and deck names only; importing that file starts each card
 with a new schedule and empty review history. The FSRS v4 cards were
@@ -75,6 +77,14 @@ Sign in and use **Move browser cards** to copy cards from this browser's
 `localStorage` into your account. Export/import JSON backups remain available.
 After selecting a backup, choose whether to keep its deck names, add all cards
 to an existing deck, or create a new deck. Importing adds cards with new IDs.
+
+Shared decks appear on **Manage decks**. Copying one creates a private deck
+with fresh schedules and no review history. Every new account receives private
+copies of the published decks automatically. New decks are private by default;
+publishing a deck is an explicit database setting. The published song decks are
+Noc Komety, Takie tango, Wszystko kwitnie wkoło, and Zacznij od Bacha. Their
+song cards include annotated Polish phrases, English translations, and a grammar
+x-ray key below the card.
 
 Auth mail is sent through Resend as `SRS Cards <no-reply@submergedstructure.com>`.
 The domain has verified DKIM and return-path records at name.com. A sign-in

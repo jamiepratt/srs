@@ -22,7 +22,7 @@ def wait_for_sleep():
     raise AssertionError('Concurrent transaction did not reach barrier')
 
 auth = f"set request.jwt.claim.sub='{user}'; set role authenticated;"
-sql(f"insert into auth.users values ('{user}'); insert into decks values ('{user}','A'),('{user}','B');")
+sql(f"insert into auth.users values ('{user}'); delete from cards where user_id='{user}'; delete from decks where user_id='{user}'; insert into decks values ('{user}','A'),('{user}','B');")
 first = background(auth + "begin; select delete_deck('A'); select pg_sleep(1); commit;")
 wait_for_sleep()
 second = sql(auth + "select delete_deck('B');", check=False)

@@ -112,6 +112,9 @@ test("account import waits for a destination and routes cards to existing or new
   w.SRS_CONFIG = { supabaseUrl: "https://cloud.test", supabasePublishableKey: "test" };
   w.supabase = {
     createClient: () => ({
+      rpc(name) {
+        if (name === "shared_deck_catalog") return Promise.resolve({ data: [] });
+      },
       auth: {
         onAuthStateChange(handler) {
           handler("INITIAL_SESSION", { user: { id: "user-1", email: "test@example.test" } });

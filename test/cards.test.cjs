@@ -68,6 +68,9 @@ const settle = () => new Promise((r) => setTimeout(r, 30));
 function installCloud() {
   window.supabase = {
     createClient: () => ({
+      rpc(name) {
+        if (name === "shared_deck_catalog") return Promise.resolve({ data: [] });
+      },
       auth: {
         onAuthStateChange(fn) {
           window.authHandler = fn;

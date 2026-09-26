@@ -113,6 +113,7 @@ function cloudClient(error = null) {
       };
     },
     rpc(name, args) {
+      if (name === "shared_deck_catalog") return Promise.resolve({ data: [] });
       window.rpcCalls = (window.rpcCalls || 0) + 1;
       assert.equal(name, "delete_deck");
       assert.equal(args.deck_name, "Unused");
@@ -192,4 +193,28 @@ test("a card added by another tab prevents deleting its deck", () => {
   assert.match(w.document.body.textContent, /Move all cards/);
   w.close();
   other.close();
+});
+test("merging decks moves cards with their schedule and removes the source", () => {
+  const w = app();
+  w.location.hash = "#study";
+  w.dispatchEvent(new w.Event("hashchange"));
+  const inputs = w.document.querySelectorAll("textarea");
+  inputs[0].value = "Question";
+  inputs[1].value = "Answer";
+  w.document.querySelector("form").dispatchEvent(
+    new w.Event("submit", { cancelable: true }),
+  );
+  const before = JSON.parse(w.localStorage.getItem("jamiepratt.srs.cards.v2")).cards;
+  w.location.hash = "#manage-decks";
+  w.dispatchEvent(new w.Event("hashchange"));
+  w.document.querySelector("select.merge-destination").value = "Unused";
+  w.confirm = () => true;
+  button(w, "Merge decks").click();
+  const after = JSON.parse(w.localStorage.getItem("jamiepratt.srs.cards.v2")).cards;
+  assert.deepEqual(JSON.parse(w.localStorage.getItem("jamiepratt.srs.decks.v1")), ["Unused"]);
+  assert.equal(after[0].deck, "Unused");
+  assert.deepEqual(after[0].schedule, before[0].schedule);
+  assert.deepEqual(after[0].reviews, before[0].reviews);
+  assert.equal(after[0].revision, before[0].revision + 1);
+  w.close();
 });
