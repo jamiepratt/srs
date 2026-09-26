@@ -115,9 +115,6 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 
 .button.secondary:hover, .button.secondary:focus-visible { background: #cee1d2; }
 
-.button.danger { background: #b42332; color: #fff; }
-.button.danger:hover, .button.danger:focus-visible { background: #8f1826; }
-
 .reveal { margin-top: 36px; }
 
 .rating.again { background: #a64842; }
@@ -192,3 +189,5 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .edit-card .button { margin-right: 10px; margin-bottom: 8px; }
 .button.danger { background: #f4e5e2; color: #873a32; }
 .button.danger:hover, .button.danger:focus-visible { background: #ecd1cd; }
+.management-panel .button.danger { background: #b42332; color: #fff; }
+.management-panel .button.danger:hover, .management-panel .button.danger:focus-visible { background: #8f1826; }
