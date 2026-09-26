@@ -1119,9 +1119,17 @@
                        #(download-backup! (browser-cards)))))
     form))
 
+(defn collapsible-panel [class-name title state-key content]
+  (let [panel (element "details" class-name nil)
+        heading (element "summary" nil title)]
+    (set! (.-open panel) (boolean (get @app-state state-key)))
+    (.addEventListener panel "toggle"
+                       #(swap! app-state assoc state-key (.-open panel)))
+    (append! panel heading content)
+    panel))
+
 (defn add-form []
   (let [form (element "form" "add-form" nil)
-        title (element "h2" nil "Add a card")
         front (element "textarea" nil nil)
         back (element "textarea" nil nil)
         front-label (element "label" nil "Front")
@@ -1145,12 +1153,12 @@
                          (make-card! (.-value front) (.-value back))))
     (append! front-label front)
     (append! back-label back)
-    (append! form title
-             (element "p" "format-hint"
-                      (str "Adding to " (:current-deck @app-state) "."))
+    (append! form (element "p" "format-hint"
+                           (str "Adding to " (:current-deck @app-state) "."))
              front-label back-label
              (element "p" "format-hint" "HTML fragments are supported. Scripts and unsafe attributes are removed.")
-             submit)))
+             submit)
+    (collapsible-panel "add-card-panel" "Add a card" :add-card-open? form)))
 
 (defn edit-card-form [card]
   (let [form (element "form" "edit-card management-panel" nil)
@@ -1184,22 +1192,11 @@
   (let [panel (element "section" "study-card" nil)]
     (if card
       (let [revealed? (:revealed? @app-state)
-            move-label (element "label" "move-label" "Move card to deck")
-            move-select (element "select" "deck-select" nil)
             label (element "p" "eyebrow"
                            (str (if (due? card) "Due now" "Review early")
                                 " · " (name (get-in card [:schedule :state]))))
             front (card-text (:front card))
             due (element "p" "due" (str "Scheduled: " (date-label card)))]
-        (doseq [name (deck-options)]
-          (let [option (element "option" nil name)]
-            (set! (.-value option) name)
-            (append! move-select option)))
-        (set! (.-value move-select) (:deck card))
-        (set! (.-disabled move-select) (boolean (:busy? @app-state)))
-        (.addEventListener move-select "change"
-                           #(move-card! card (.. % -target -value)))
-        (append! move-label move-select)
         (append! panel label front)
         (if revealed?
           (let [answer (element "div" "answer" nil)
@@ -1215,18 +1212,39 @@
           (append! panel
                    (button "Show answer · Space" "button reveal"
                            #(set-ui! {:revealed? true}))))
-        (let [actions (element "div" "card-actions" nil)]
-          (append! actions
-                   (button "Edit card" "button secondary"
-                           #(set-ui! {:editing {:card card :front (:front card) :back (:back card)}
-                                      :message nil}))
-                   (button "Delete card" "button danger" #(delete-card! card)))
-          (append! panel due move-label actions)))
+        (append! panel due))
       (append! panel
                (element "p" "empty" (if (seq (selected-deck-cards))
                                       "All caught up. Select a card to review early."
                                       "Add a card to get started."))))
     panel))
+
+(defn card-options [card]
+  (let [content (element "div" "card-options-content" nil)
+        move-label (element "label" "move-label" "Move card to deck")
+        move-select (element "select" "deck-select" nil)
+        actions (element "div" "card-actions" nil)]
+    (doseq [name (deck-options)]
+      (let [option (element "option" nil name)]
+        (set! (.-value option) name)
+        (append! move-select option)))
+    (set! (.-value move-select) (:deck card))
+    (set! (.-disabled move-select) (boolean (:busy? @app-state)))
+    (.addEventListener move-select "change"
+                       #(move-card! card (.. % -target -value)))
+    (append! move-label move-select)
+    (append! actions
+             (button "Edit card" "button secondary"
+                     #(set-ui! {:editing {:card card :front (:front card) :back (:back card)}
+                                :message nil}))
+             (button "Delete card" "button danger" #(delete-card! card)))
+    (append! content move-label actions)
+    (let [panel (collapsible-panel "card-options-panel" "Card options"
+                                   :card-options-open? content)]
+      (append! (.querySelector panel "summary")
+               (element "span" "card-options-front"
+                        (str "Card: " (card-summary (:front card)))))
+      panel)))
 
 (defn grammar-card? [card]
   (boolean (when card
@@ -1305,6 +1323,8 @@
           (append! study-column (grammar-key)))
         (append! layout study-column
                  (element "aside" "sidebar" nil))
+        (when card
+          (append! (.-lastChild layout) (card-options card)))
         (append! (.-lastChild layout) (add-form) (card-list))
         (append! root layout)
         (append! root

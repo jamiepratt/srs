@@ -67,7 +67,7 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 
 .study-column { display: grid; gap: 14px; }
 
-.study-card, .add-form, .card-list { background: #fff; border: 1px solid #d9e2da; border-radius: 18px; box-shadow: 0 8px 26px #244c3010; }
+.study-card, .add-card-panel, .card-options-panel, .card-list { background: #fff; border: 1px solid #d9e2da; border-radius: 18px; box-shadow: 0 8px 26px #244c3010; }
 
 .study-card { min-height: 420px; padding: clamp(24px, 5vw, 44px); display: flex; flex-direction: column; align-items: start; }
 
@@ -125,13 +125,19 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .rating.easy { background: #2f657b; }
 
 .due { font-size: .88rem; margin: auto 0 0; padding-top: 32px; }
-.move-label { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: .82rem; color: #62736a; }
+.move-label { display: grid; gap: 7px; font-size: .82rem; color: #62736a; }
+.card-options-panel .deck-select { width: 100%; max-width: none; }
 
 .empty { color: #6b7c70; margin: auto; text-align: center; width: 100%; }
 
 .sidebar { display: grid; gap: 18px; }
 
-.add-form, .card-list { padding: 22px; }
+.card-list { padding: 22px; }
+.add-card-panel, .card-options-panel { min-width: 0; }
+.add-card-panel summary, .card-options-panel summary { cursor: pointer; padding: 20px 22px; font-size: 1.08rem; font-weight: 650; }
+.add-card-panel summary:focus-visible, .card-options-panel summary:focus-visible { outline: 2px solid #367954; outline-offset: -4px; border-radius: 18px; }
+.add-form, .card-options-content { padding: 0 22px 22px; }
+.card-options-front { display: block; max-width: 100%; overflow-wrap: anywhere; color: #62736a; font-size: .82rem; font-weight: 400; margin-top: 5px; }
 
 .add-form label, .edit-card label { display: block; font-size: .9rem; font-weight: 650; margin: 0 0 14px; }
 
@@ -170,7 +176,7 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
   .ratings { grid-template-columns: repeat(2, 1fr); }
 }
 
-.card-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+.card-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .edit-card .button { margin-right: 10px; margin-bottom: 8px; }
 .button.danger { background: #f4e5e2; color: #873a32; }
 .button.danger:hover, .button.danger:focus-visible { background: #ecd1cd; }

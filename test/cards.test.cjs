@@ -32,6 +32,28 @@ function edit(w, front, back) {
   fields.forEach((f) => f.dispatchEvent(new w.Event("input")));
   button(w, "Save changes").click();
 }
+test("card controls and add form start collapsed in the sidebar", async () => {
+  const w = app();
+  const options = w.document.querySelector(".sidebar .card-options-panel");
+  const add = w.document.querySelector(".sidebar .add-card-panel");
+  assert.ok(options);
+  assert.ok(add);
+  assert.equal(options.open, false);
+  assert.equal(add.open, false);
+  assert.match(options.querySelector("summary").textContent, /Card options.*Question/);
+  assert.equal(w.document.querySelector(".study-card .card-actions"), null);
+  assert.ok(options.querySelector(".move-label select"));
+  assert.ok(options.querySelector(".card-actions button"));
+  options.querySelector("summary").click();
+  add.querySelector("summary").click();
+  assert.equal(options.open, true);
+  assert.equal(add.open, true);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  button(w, "Show answer · Space").click();
+  assert.equal(w.document.querySelector(".card-options-panel").open, true);
+  assert.equal(w.document.querySelector(".add-card-panel").open, true);
+  w.close();
+});
 test("editing persists both sides while retaining schedule and history, and sanitizes display", () => {
   const w = app();
   button(w, "Show answer · Space").click();
