@@ -126,8 +126,11 @@ to an existing deck, or create a new deck. Importing adds cards with new IDs.
 
 Shared decks appear on **Manage decks**. Copying one creates a private deck
 with fresh schedules and no review history. Every new account receives private
-copies of the published decks automatically. New decks are private by default;
-publishing a deck is an explicit database setting. The published song decks are
+copies of the published decks automatically.
+An account's optional `user_metadata.default_deck` selects its opening deck when
+the URL has no `deck` parameter. Explicit deck links take priority; unavailable
+defaults fall back to an existing deck.
+New decks are private by default; publishing a deck is an explicit database setting. The published song decks are
 Noc Komety, Takie tango, Wszystko kwitnie wkoło, and Zacznij od Bacha. Their
 song cards include annotated Polish phrases, English translations, and a grammar
 x-ray key below the card.

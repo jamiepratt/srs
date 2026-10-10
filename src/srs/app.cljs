@@ -246,12 +246,17 @@
                                          (.-message error))}))))))
 
 (defn auth-changed! [user]
-  (let [user-id (some-> user (aget "id"))]
+  (let [user-id (some-> user (aget "id"))
+        default-deck (some-> user (aget "user_metadata") (aget "default_deck"))]
     (if user-id
       (when (not= user-id (get-in @app-state [:user :id]))
         (set-ui! {:user {:id user-id :email (aget user "email")}
                   :cards [] :decks ["Default"] :shared-decks []
-                  :current-deck (or (url-deck) "Default")
+                  :current-deck (or (url-deck)
+                                    (when (and (string? default-deck)
+                                               (seq (str/trim default-deck)))
+                                      default-deck)
+                                    "Default")
                   :editing nil :busy? false :selected-id nil :revealed? false
                   :pending-import nil :import-destination "" :import-new-deck ""
                   :auth-loading? true :message nil :account-deletion-message nil})

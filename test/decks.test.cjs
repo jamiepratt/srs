@@ -16,7 +16,7 @@ function app(decks = ["Default", "Unused"], client, url = "https://example.test/
     dom.window.supabase = {
       createClient: () =>
         dom.window.eval(
-          `(${cloudClient.toString()})(${JSON.stringify(client.error)})`,
+          `(${cloudClient.toString()})(${JSON.stringify(client.error)}, ${JSON.stringify(client.defaultDeck)})`,
         ),
     };
   }
@@ -100,14 +100,15 @@ test("nonempty deck cannot be deleted and cards remain intact", () => {
   w.close();
 });
 
-function cloudClient(error = null) {
+function cloudClient(error = null, defaultDeck = null) {
   let decks = ["Default", "Unused"];
   return {
     error,
+    defaultDeck,
     auth: {
       onAuthStateChange(handler) {
         handler("INITIAL_SESSION", {
-          user: { id: "user-1", email: "test@example.test" },
+          user: { id: "user-1", email: "test@example.test", user_metadata: {default_deck: defaultDeck} },
         });
       },
     },
@@ -162,6 +163,20 @@ test("cloud deck from URL survives account loading", async () => {
   assert.equal(w.document.querySelector("select").value, "Unused");
   assert.equal(new URL(w.location.href).searchParams.get("deck"), "Unused");
   w.close();
+});
+test("account default opens without a deck URL; explicit links win and stale defaults fall back", async () => {
+  for (const [preference, url, expected] of [
+    ["Unused", "https://example.test/", "Unused"],
+    ["Unused", "https://example.test/?deck=Default", "Default"],
+    ["Gone", "https://example.test/", "Default"],
+    [{bad: true}, "https://example.test/", "Default"],
+  ]) {
+    const w = app(undefined, cloudClient(null, preference), url);
+    await settle();
+    assert.equal(w.document.querySelector("select").value, expected);
+    assert.equal(new URL(w.location.href).searchParams.get("deck"), expected);
+    w.close();
+  }
 });
 test("cloud rejection preserves deck and reports why", async () => {
   const w = app(undefined, cloudClient("Deck is not empty."));
