@@ -46,6 +46,7 @@ test("both export buttons follow the scheduling checkbox and unscheduled imports
   const inputs = w.document.querySelectorAll("textarea");
   inputs[0].value = "Question";
   inputs[1].value = "Answer";
+  inputs[2].value = "<p>An idiomatic translation.</p>";
   w.document.querySelector("form").dispatchEvent(new w.Event("submit", { cancelable: true }));
   button(w, "Show answer · Space").click();
   button(w, "3 Good").click();
@@ -62,6 +63,7 @@ test("both export buttons follow the scheduling checkbox and unscheduled imports
   button(w, "Export selected deck").click();
   const scheduled = await readBlob(w, exported);
   assert.equal(scheduled.deck_name, "Default");
+  assert.equal(scheduled.cards[0].notes, original.notes);
   assert.deepEqual(scheduled.cards[0].reviews, original.reviews);
   assert.deepEqual(scheduled.cards[0].schedule, original.schedule);
 
@@ -71,7 +73,8 @@ test("both export buttons follow the scheduling checkbox and unscheduled imports
   const selected = await readBlob(w, exported);
   assert.equal(selected.scheduling_data, false);
   assert.equal(selected.deck_name, "Default");
-  assert.deepEqual(Object.keys(selected.cards[0]).sort(), ["back", "deck", "front", "id"]);
+  assert.equal(selected.cards[0].notes, original.notes);
+  assert.deepEqual(Object.keys(selected.cards[0]).sort(), ["back", "deck", "front", "id", "notes"]);
   button(w, "Export all cards").click();
   const all = await readBlob(w, exported);
   assert.equal(all.scheduling_data, false);
@@ -95,6 +98,7 @@ test("both export buttons follow the scheduling checkbox and unscheduled imports
   const card = JSON.parse(restored.localStorage.getItem("jamiepratt.srs.cards.v2")).cards[0];
   assert.equal(card.front, original.front);
   assert.equal(card.back, original.back);
+  assert.equal(card.notes, original.notes);
   assert.equal(card.deck, "Default");
   assert.equal(card.schedule.reps, 0);
   assert.equal(card.schedule.state, "new");
@@ -145,7 +149,7 @@ test("account import waits for a destination and routes cards to existing or new
 
   const backup = {
     version: 2, scheduling_data: false, deck_name: "Source",
-    cards: [{ id: "old-id", front: "Question", back: "Answer", deck: "Source" }],
+    cards: [{ id: "old-id", front: "Question", back: "Answer", notes: "Simple definition", deck: "Source" }],
   };
   await chooseFile(w, backup);
   assert.equal(inserted.length, 0);
@@ -159,6 +163,7 @@ test("account import waits for a destination and routes cards to existing or new
   await new Promise((resolve) => w.setTimeout(resolve, 30));
   assert.equal(inserted.length, 1, w.document.body.textContent);
   assert.equal(inserted[0].deck, "Default");
+  assert.equal(inserted[0].notes, "Simple definition");
   assert.equal(inserted[0].user_id, "user-1");
   assert.notEqual(inserted[0].id, "old-id");
   assert.equal(w.document.querySelector(".import-destination"), null);

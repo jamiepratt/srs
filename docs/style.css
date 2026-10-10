@@ -191,3 +191,14 @@ h2 { font-size: 1.08rem; margin: 0 0 16px; }
 .button.danger:hover, .button.danger:focus-visible { background: #ecd1cd; }
 .management-panel .button.danger { background: #b42332; color: #fff; }
 .management-panel .button.danger:hover, .management-panel .button.danger:focus-visible { background: #8f1826; }
+
+/* Supplementary explanations are shown only with a revealed answer. */
+.card-notes { width: 100%; margin-top: 22px; padding: 16px 18px; border-left: 4px solid #728ab2; border-radius: 0 10px 10px 0; background: #f0f4fa; color: #33465f; }
+.notes-heading { margin: 0 0 8px; font-size: .75rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: #506784; }
+.answer .card-notes .card-text { font-size: 1rem; line-height: 1.6; }
+.card-notes p { margin: 0 0 .7em; white-space: normal; }
+.card-notes p:last-child { margin-bottom: 0; }
+.card-text .card-prompt { display: block; margin: 0 0 14px; font-size: .85rem; color: #62736a; }
+.card-text mark { background: #fff1a8; color: #302900; border-bottom: 2px solid #8b7400; border-radius: 3px; padding: 0 .12em; }
+
+.card-text .lyric-phrase, .card-text .card-translation { margin: 0; }

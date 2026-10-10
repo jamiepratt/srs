@@ -21,6 +21,7 @@
     (when-not (and (string? (:id card))
                    (string? (:front card))
                    (string? (:back card))
+                   (or (nil? (:notes card)) (string? (:notes card)))
                    (map? schedule)
                    (= 6 (:fsrs-version schedule))
                    (contains? schedule :step)
@@ -35,6 +36,7 @@
                    (string? (:last-repeat schedule)))
       (throw (js/Error. "Invalid card data")))
     (-> card
+        (update :notes #(or % ""))
         (update :deck #(if (and (string? %) (seq (str/trim %))) % "Default"))
         (update-in [:schedule :due] t/instant)
         (update-in [:schedule :last-repeat] t/instant)
@@ -46,9 +48,10 @@
   (when-not (and (string? (:id card))
                  (string? (:front card))
                  (string? (:back card))
+                 (or (nil? (:notes card)) (string? (:notes card)))
                  (or (nil? (:deck card)) (string? (:deck card))))
     (throw (js/Error. "Invalid card data")))
-  {:id (:id card) :front (:front card) :back (:back card)
+  {:id (:id card) :front (:front card) :back (:back card) :notes (or (:notes card) "")
    :deck (if (seq (str/trim (or (:deck card) ""))) (:deck card) "Default")
    :schedule (fsrs/new-card!) :reviews [] :revision 0})
 
@@ -76,7 +79,7 @@
                (clj->js (cond-> {:version 2
                                  :cards (mapv (if scheduling?
                                                 encode-card
-                                                #(select-keys % [:id :front :back :deck]))
+                                                #(select-keys % [:id :front :back :notes :deck]))
                                               cards)}
                           (not scheduling?) (assoc :scheduling_data false)
                           deck-name (assoc :deck_name deck-name)))
@@ -116,7 +119,7 @@
      :legacy-count (legacy-count) :selected-id nil :revealed? false
      :export-scheduling? true
      :pending-import nil :import-destination "" :import-new-deck ""
-     :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
+     :draft-front "" :draft-back "" :draft-notes "" :draft-new-deck "" :draft-rename-deck ""
      :message nil :storage-error nil}
     (try
       (let [cards (or (browser-cards) [])
@@ -126,14 +129,14 @@
          :selected-id nil :revealed? false
          :export-scheduling? true
          :pending-import nil :import-destination "" :import-new-deck ""
-         :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
+         :draft-front "" :draft-back "" :draft-notes "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :storage-error nil :busy? false})
       (catch :default error
         {:cards [] :decks ["Default"] :shared-decks [] :current-deck "Default"
          :selected-id nil :revealed? false
          :export-scheduling? true
          :pending-import nil :import-destination "" :import-new-deck ""
-         :draft-front "" :draft-back "" :draft-new-deck "" :draft-rename-deck ""
+         :draft-front "" :draft-back "" :draft-notes "" :draft-new-deck "" :draft-rename-deck ""
          :message nil :busy? false
          :storage-error (str "Could not read saved cards: " (.-message error))}))))
 
@@ -174,7 +177,7 @@
 
 (defn cloud-row [card user-id]
   (-> (encode-card card)
-      (select-keys [:id :front :back :deck :schedule :reviews :revision])
+      (select-keys [:id :front :back :notes :deck :schedule :reviews :revision])
       (assoc :user_id user-id)))
 
 (defn load-cloud-page! [user-id offset accumulated]
@@ -272,7 +275,7 @@
                        (when (= user-id (get-in @app-state [:user :id]))
                          (set-ui! {:cards (conj (:cards @app-state) saved)
                                    :selected-id (:id saved) :revealed? false
-                                   :draft-front "" :draft-back ""
+                                   :draft-front "" :draft-back "" :draft-notes ""
                                    :busy? false :message nil})))))
                  (fn [error]
                    (set-ui! {:busy? false
@@ -418,23 +421,24 @@
       (change-cloud-card! card nil)
       (change-browser-card! card nil))))
 
-(defn edit-card! [card front back]
+(defn edit-card! [card front back notes]
   (when-not (:busy? @app-state)
     (let [front (str/trim front)
           back (str/trim back)]
       (if (or (empty? front) (empty? back))
         (set-ui! {:message "Front and back cannot be empty."})
         (if (cloud/configured?)
-          (change-cloud-card! card {:front front :back back})
-          (change-browser-card! card {:front front :back back}))))))
+          (change-cloud-card! card {:front front :back back :notes (str/trim notes)})
+          (change-browser-card! card {:front front :back back :notes (str/trim notes)}))))))
 
-(defn make-card! [front back]
+(defn make-card! [front back notes]
   (let [front (str/trim front)
         back (str/trim back)]
     (when (and (seq front) (seq back))
       (let [card {:id (str (random-uuid))
                   :front front
                   :back back
+                  :notes (str/trim notes)
                   :deck (:current-deck @app-state)
                   :schedule (fsrs/new-card!)
                   :reviews []
@@ -443,7 +447,7 @@
           (create-cloud-card! card)
           (save-cards! (conj (:cards @app-state) card)
                        {:selected-id (:id card) :revealed? false
-                        :draft-front "" :draft-back ""}))))))
+                        :draft-front "" :draft-back "" :draft-notes ""}))))))
 
 (defn create-deck! [input]
   (when-not (:busy? @app-state)
@@ -717,10 +721,17 @@
 
 (defonce card-audio (atom {:shown-key nil :key nil :player nil}))
 
+(defn embedded-card-audio-path [card]
+  (when card
+    (some-> (card-fragment (:front card))
+            (.querySelector "audio[src]")
+            (.getAttribute "src"))))
+
 (defn card-audio-path [card]
-  (some-> (aget js/window "SRS_CARD_AUDIO")
-          (aget (:deck card))
-          (aget (:front card))))
+  (or (embedded-card-audio-path card)
+      (some-> (aget js/window "SRS_CARD_AUDIO")
+              (aget (:deck card))
+              (aget (:front card)))))
 
 (defn card-back-audio-path [card]
   (some-> (aget js/window "SRS_CARD_BACK_AUDIO")
@@ -757,14 +768,19 @@
           (reset! card-audio {:shown-key nil :key nil :player nil}))))))
 
 (defn card-summary [content]
-  (let [fragment (card-fragment content)]
+  (let [fragment (card-fragment content)
+        focus (some-> (.querySelector fragment "mark") .-textContent str/trim)]
+    (doseq [prompt (array-seq (.querySelectorAll fragment ".card-prompt"))]
+      (.remove prompt))
     (doseq [line-break (array-seq (.querySelectorAll fragment "br"))]
       (.replaceWith line-break (.createTextNode js/document " ")))
     (doseq [block (array-seq (.querySelectorAll fragment "p, div, li, h1, h2, h3, h4, h5, h6, blockquote"))]
       (.before block (.createTextNode js/document " "))
       (.after block (.createTextNode js/document " ")))
     (let [summary (str/trim (str/replace (.-textContent fragment) #"\s+" " "))]
-      (if (seq summary) summary "Untitled card"))))
+      (if (seq summary)
+        (if (seq focus) (str focus " · " summary) summary)
+        "Untitled card"))))
 
 (defn append! [parent & children]
   (doseq [child children]
@@ -1232,11 +1248,17 @@
   (let [form (element "form" "add-form" nil)
         front (element "textarea" nil nil)
         back (element "textarea" nil nil)
+        notes (element "textarea" nil nil)
+        notes-label (element "label" nil "Notes (optional, back only)")
         front-label (element "label" nil "Front")
         back-label (element "label" nil "Back")
         submit (element "button" "button" "Add card")]
     (set! (.-rows front) 2)
     (set! (.-rows back) 2)
+    (set! (.-rows notes) 3)
+    (set! (.-value notes) (:draft-notes @app-state))
+    (.addEventListener notes "input"
+                       #(swap! app-state assoc :draft-notes (.. % -target -value)))
     (set! (.-required front) true)
     (set! (.-required back) true)
     (set! (.-value front) (:draft-front @app-state))
@@ -1250,12 +1272,13 @@
     (.addEventListener form "submit"
                        (fn [event]
                          (.preventDefault event)
-                         (make-card! (.-value front) (.-value back))))
+                         (make-card! (.-value front) (.-value back) (.-value notes))))
     (append! front-label front)
     (append! back-label back)
+    (append! notes-label notes)
     (append! form (element "p" "format-hint"
                            (str "Adding to " (:current-deck @app-state) "."))
-             front-label back-label
+             front-label back-label notes-label
              (element "p" "format-hint" "HTML fragments are supported. Scripts and unsafe attributes are removed.")
              submit)
     (collapsible-panel "add-card-panel" "Add a card" :add-card-open? form)))
@@ -1264,14 +1287,16 @@
   (let [form (element "form" "edit-card management-panel" nil)
         front (element "textarea" nil nil)
         back (element "textarea" nil nil)
+        notes (element "textarea" nil nil)
+        notes-label (element "label" nil "Notes (optional, back only)")
         front-label (element "label" nil "Front")
         back-label (element "label" nil "Back")
         submit (element "button" "button" "Save changes")]
-    (doseq [[field key] [[front :front] [back :back]]]
+    (doseq [[field key] [[front :front] [back :back] [notes :notes]]]
       (set! (.-value field) (get-in @app-state [:editing key]))
       (set! (.-rows field) 5)
       (set! (.-disabled field) (boolean (:busy? @app-state)))
-      (set! (.-required field) true)
+      (set! (.-required field) (not= key :notes))
       (.addEventListener field "input"
                          #(swap! app-state assoc-in [:editing key] (.. % -target -value))))
     (set! (.-type submit) "submit")
@@ -1279,14 +1304,25 @@
     (.addEventListener form "submit"
                        (fn [event]
                          (.preventDefault event)
-                         (edit-card! card (.-value front) (.-value back))))
+                         (edit-card! card (.-value front) (.-value back) (.-value notes))))
     (append! front-label front)
     (append! back-label back)
+    (append! notes-label notes)
     (append! form (element "h2" nil "Edit card")
              (element "p" "format-hint" "Edit HTML or text. Schedule and review history are kept.")
-             front-label back-label submit
+             front-label back-label notes-label submit
              (button "Cancel editing" "button secondary" #(set-ui! {:editing nil :message nil})))
     form))
+
+(defn card-notes [notes]
+  (let [fragment (card-fragment (or notes ""))]
+    (when (or (seq (str/trim (.-textContent fragment)))
+              (.querySelector fragment "img, audio, video, hr"))
+      (let [panel (element "aside" "card-notes" nil)
+            content (element "div" "card-text" nil)]
+        (.setAttribute panel "aria-label" "Notes")
+        (append! content fragment)
+        (append! panel (element "h3" "notes-heading" "Notes") content)))))
 
 (defn card-view [card]
   (let [panel (element "section" "study-card" nil)]
@@ -1300,13 +1336,15 @@
         (append! panel label front)
         (when (card-audio-path card)
           (append! panel
-                   (button "Play pronunciation" "button secondary audio-replay"
+                   (button (if (embedded-card-audio-path card) "Play song clip" "Play pronunciation")
+                           "button secondary audio-replay"
                            #(play-card-audio! card :front))))
         (if revealed?
           (let [answer (element "div" "answer" nil)
                 buttons (element "div" "ratings" nil)]
             (append! answer (element "p" "eyebrow" "Answer")
-                     (card-text (:back card)))
+                     (card-text (:back card))
+                     (card-notes (:notes card)))
             (when (card-back-audio-path card)
               (append! answer
                        (button "Play song phrase" "button secondary audio-replay"
@@ -1343,7 +1381,7 @@
     (append! move-label move-select)
     (append! actions
              (button "Edit card" "button secondary"
-                     #(set-ui! {:editing {:card card :front (:front card) :back (:back card)}
+                     #(set-ui! {:editing {:card card :front (:front card) :back (:back card) :notes (:notes card)}
                                 :message nil}))
              (button "Delete card" "button danger" #(delete-card! card)))
     (append! content move-label actions)

@@ -1,0 +1,203 @@
+{
+  "version": 2,
+  "scheduling_data": false,
+  "deck_name": "The Geeks Will Inherit the Earth - English A2-B1",
+  "cards": [
+    {
+      "id": "4b5d5d24-fee8-5acf-8f85-cf0aca61023e",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">I remember trying to talk to you in high school.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/talk.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Pamiętam, jak w liceum próbowałem cię zagadać.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Zagadać” pasuje do nieśmiałej próby nawiązania rozmowy. „High school” oddajemy jako „liceum”, choć amerykańska szkoła działa trochę inaczej.</p>"
+    },
+    {
+      "id": "42019712-ddde-5fca-96f7-5966664ed6f2",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">Couldn&#x27;t even get a look, &#x27;cause you were too cool.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/too-cool.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Ani spojrzenia. Taka z ciebie była gwiazda.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Cool” oznacza tu kogoś popularnego, kto czuje się zbyt ważny, by zwrócić uwagę na narratora. „Gwiazda” zachowuje ironię; nie chodzi o chłód. „’Cause” to potoczne „because”.</p>"
+    },
+    {
+      "id": "db0e91c5-c236-54de-b6c5-8d1d923d5c5b",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">But now we&#x27;re older, and we&#x27;re playing by the new rules.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/new-rules.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Dziś jesteśmy starsi i gramy według nowych zasad.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Grać według nowych zasad” zachowuje metaforę: w dorosłym życiu liczą się inne rzeczy niż popularność w szkole.</p>"
+    },
+    {
+      "id": "f2e03776-0a84-51c1-b91e-010aa48895eb",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We lived and learned.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/lived-and-learned.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Życie nas nauczyło.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> To skrót myślowy: zdobyliśmy doświadczenie i wyciągnęliśmy wnioski. Naturalne „Życie nas nauczyło” lepiej oddaje sens niż dosłowne „Żyliśmy i uczyliśmy się”.</p>"
+    },
+    {
+      "id": "40eb29e0-2143-5996-9fe7-22812ea06938",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">&#x27;Cause as time moves on...</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/time-moves-on.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Bo z biegiem lat...</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Time moves on” oznacza, że czas płynie. „Z biegiem lat” pasuje do opowieści o dorastaniu. „’Cause” jest potoczną formą „because”.</p>"
+    },
+    {
+      "id": "7c198750-27a8-582c-a3e8-c665f2c7c538",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We find we belong.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/belong.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Znajdujemy swoje miejsce.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> Nie chodzi o własność. Bohaterowie odkrywają, że gdzieś pasują i są akceptowani. „Znaleźć swoje miejsce” oddaje ten sens po polsku.</p>"
+    },
+    {
+      "id": "89a7b436-6b5f-5495-bd1c-6ed79c5b388b",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">And then, in the end...</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/in-the-end.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">I tak, koniec końców...</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „In the end” znaczy „ostatecznie”, po wszystkim, co się wydarzyło. Potoczne „koniec końców” pasuje do tonu piosenki.</p>"
+    },
+    {
+      "id": "936214ee-8077-5ee5-a4fd-7f048a6d19f2",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We were the ones you used to make fun of.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/make-fun-of.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">To my byliśmy dla was pośmiewiskiem.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Make fun of someone” to wyśmiewać kogoś, a nie bawić się z nim. „Used to” mówi o tym, co dawniej zdarzało się regularnie. „Wy” odnosi się tu do szkolnych dręczycieli.</p>"
+    },
+    {
+      "id": "7a041f54-1bfb-5212-ad61-f61955825430",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We stayed at home alone instead of falling in love.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/instead-of.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Siedzieliśmy sami w domu, zamiast się zakochiwać.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Fall in love” tłumaczymy jako „zakochać się”, bez dosłownego upadania. „Instead of” znaczy „zamiast”; po nim czasownik ma formę z „-ing”.</p>"
+    },
+    {
+      "id": "4c7885b4-20c9-5c17-bf51-1a6a4309fcf0",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We never got the chance to be prom king.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/prom-king.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Na króla balu nikt z nas nie miał szans.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Prom king” to chłopak wybrany królem szkolnego balu w USA. To symbol popularności. „Nie miał szans” brzmi naturalniej niż dosłowne „nie dostał szansy”.</p>"
+    },
+    {
+      "id": "1ba79668-ec90-5b4d-87b6-0d41d990016d",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We didn&#x27;t even dance, but here&#x27;s the thing:</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/heres-the-thing.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Nawet nie tańczyliśmy. Ale wiecie co?</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Here’s the thing” zapowiada ważny szczegół albo zmianę spojrzenia. „Ale wiecie co?” zachowuje swobodny, zaczepny ton. Nie chodzi o pokazywanie przedmiotu.</p>"
+    },
+    {
+      "id": "d78c1ccc-7559-5329-a71e-3291108dccbd",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We got the cars, we got the money.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/cars-and-money.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Mamy fury, mamy kasę.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Fury” i „kasa” oddają przechwałki i luz oryginału. „We got” znaczy tutaj potocznie „we have”, czyli „mamy”.</p>"
+    },
+    {
+      "id": "5ecb6903-a944-57c0-ae46-8c65d51e46ee",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">We need some sun, but I&#x27;m telling you, honey,</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/some-sun.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Przydałoby się trochę słońca, ale mówię ci, skarbie,</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> To żart z bladych osób spędzających dużo czasu w domu. „Przydałoby się” zachowuje autoironię. „Honey” to czułe, tutaj lekko zaczepne „skarbie”, nie „miód”.</p>"
+    },
+    {
+      "id": "265ed1f4-640c-5f80-94dd-d4514e6de9f6",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">The geeks will inherit the earth.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/inherit-the-earth.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Nerdy odziedziczą świat!</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Nerdy” zachowuje dumne, żartobliwe określenie fanów komputerów, gier czy nauki. „Odziedziczą świat” oznacza tu, że przyszłość będzie należeć do nich, a nie że dostaną ziemię w spadku.</p>"
+    },
+    {
+      "id": "2cbfd46f-3da4-5cd3-87a9-595f8f3ac9c6",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">Everybody tries to tell you that you&#x27;re different.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/different.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Wszyscy ci wmawiają, że do nich nie pasujesz.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> Dosłownie: „że jesteś inny”. „Nie pasujesz” pokazuje sens w tej piosence: inni dają ci odczuć, że jesteś poza ich grupą. „Wmawiają” oddaje presję otoczenia.</p>"
+    },
+    {
+      "id": "a0933473-5bc1-5c8a-8fe8-69a053d97be0",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">So you run away and wonder if it makes sense.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/makes-sense.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Więc uciekasz i się zastanawiasz, czy to ma sens.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Make sense” to „mieć sens”, nie „robić sens”. „Wonder” oznacza tu zastanawianie się nad pytaniem, nie zachwyt. „Run away” to uciec lub wycofać się.</p>"
+    },
+    {
+      "id": "b55d401d-16ce-5d02-8811-b123b6cc4093",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">But the day will come when you will get a new chance.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/new-chance.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Lecz nadejdzie dzień, gdy dostaniesz nową szansę.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „The day will come” brzmi jak obietnica lepszej przyszłości. „Nowa szansa” oznacza kolejną okazję, by coś zmienić lub pokazać, na co cię stać.</p>"
+    },
+    {
+      "id": "ecdd0f9b-c7f2-5e50-98b9-41f52ebfe9de",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">The tables turn.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/tables-turn.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Role się odwrócą.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> Ten idiom oznacza, że sytuacja się zmienia: przewagę zyskuje ktoś, kto wcześniej jej nie miał. Nie tłumaczymy go jako obracania stołów. Polski czas przyszły pasuje do obietnicy z poprzedniej linijki.</p>"
+    },
+    {
+      "id": "54cc3f49-9ad1-5e5f-a45a-48474bf1b6f2",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">And you know you&#x27;ll be much more than they see.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/more-than-they-see.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">I wiesz, że będziesz kimś więcej, niż oni w tobie widzą.</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „See” oznacza tu ocenę człowieka, nie samo patrzenie. „Kimś więcej” podkreśla, że inni nie dostrzegają twoich możliwości.</p>"
+    },
+    {
+      "id": "f6593df8-d873-56f0-98c3-7056061a938a",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Jak rozumiesz ten zwrot w piosence?</p><p class=\"lyric-phrase\" lang=\"en\">In time, you&#x27;ll find...</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/in-time.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">Z czasem zrozumiesz...</p>",
+      "notes": "<p lang=\"pl\"><strong>O tłumaczeniu:</strong> „In time” oznacza tutaj „z czasem”, nie „na czas”. „Find” znaczy tu odkryć coś lub zrozumieć, a nie znaleźć zgubiony przedmiot.</p>"
+    },
+    {
+      "id": "bf3e3753-1613-52db-a299-cf7da1c9d1f8",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">Couldn&#x27;t even get a look, &#x27;cause you were too <mark>cool</mark>.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/too-cool.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">popularny; uważany za fajnego</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> Popular and liked by other people. In this song, the person thinks they are too important to notice the singer.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Gwiazda” jest ironicznym odpowiednikiem „cool” w całym zdaniu. Nie oznacza tu osoby sławnej ani kogoś o niskiej temperaturze.</p>"
+    },
+    {
+      "id": "cf09aaa9-4bc5-5df1-bd20-793329d0e41b",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">But now we&#x27;re older, and we&#x27;re playing by the new <mark>rules</mark>.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/new-rules.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">zasady</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> Instructions that say what people can or cannot do. Here, they mean the things that matter for success.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Nowe zasady gry” to metafora zmiany życia po szkole. Nie chodzi o reguły prawdziwej gry.</p>"
+    },
+    {
+      "id": "ad27f282-6283-50eb-9d1a-b48cd7fa0009",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">We find we <mark>belong</mark>.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/belong.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">pasować; czuć się częścią grupy</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> To feel accepted and comfortable as part of a group or in a place.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Znajdujemy swoje miejsce” naturalnie oddaje „we find we belong”. Tutaj „belong” nie znaczy „być czyjąś własnością”.</p>"
+    },
+    {
+      "id": "2e331742-28fd-544c-95fe-0ad9af2fcaef",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">We never got the chance to be <mark>prom</mark> king.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/prom-king.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">szkolny bal, zwykle pod koniec nauki</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> A formal dance for students, usually near the end of high school in the US.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Król balu” to odpowiednik „prom king”. Nie zastępujemy „prom” słowem „studniówka”, bo to podobne, ale różne szkolne tradycje.</p>"
+    },
+    {
+      "id": "27a0ebef-2e8c-5d60-88d3-e86e828816a7",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">The <mark>geeks</mark> will inherit the earth.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/inherit-the-earth.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">nerdy; pasjonaci komputerów, gier lub nauki</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> People who are very interested in subjects such as computers, games or science. The word can be unkind, but the singers use it proudly here.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Nerdy” zachowuje żart i dumę bohaterów. „Kujony” zbyt mocno kojarzyłyby się tylko z nauką szkolną i ocenami.</p>"
+    },
+    {
+      "id": "63757ace-cdb2-5c0d-9b4d-3fac81ae6bc7",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">The geeks will <mark>inherit</mark> the earth.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/inherit-the-earth.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">odziedziczyć; tutaj: przejąć w przyszłości</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> To receive money or things from someone after they die. Here, it means to become the people who have success and power in the future.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Odziedziczyć świat” jest metaforą: przyszłość będzie należeć do nerdów. „Świat” brzmi tu naturalniej niż „ziemia”, która mogłaby oznaczać działkę.</p>"
+    },
+    {
+      "id": "2697016b-ec8f-50ea-8914-c6f00bfe742b",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">So you run away and <mark>wonder</mark> if it makes sense.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/makes-sense.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">zastanawiać się</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> To think about a question because you want to know the answer.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> W tym zdaniu „wonder” znaczy „zastanawiać się”, nie „dziwić się” ani „podziwiać”. Pytanie „czy to ma sens” oddaje niepewność bohatera.</p>"
+    },
+    {
+      "id": "d1769bd6-8943-5847-97f3-562ec69f73fb",
+      "deck": "The Geeks Will Inherit the Earth - English A2-B1",
+      "front": "<p class=\"card-prompt\">Co znaczy wyróżnione słowo w tym kontekście?</p><p class=\"lyric-phrase\" lang=\"en\">But the day will come when you will get a new <mark>chance</mark>.</p><audio src=\"https://srs.submergedstructure.com/audio/geeks-english/new-chance.mp3\" preload=\"none\"></audio>",
+      "back": "<p class=\"card-translation\" lang=\"pl\">szansa; okazja</p>",
+      "notes": "<p class=\"lyric-phrase\" lang=\"en\"><strong>English definition:</strong> An opportunity to do something. Here, it is a new opportunity to succeed.</p><p lang=\"pl\"><strong>O tłumaczeniu:</strong> „Dostaniesz nową szansę” oznacza okazję do działania. „Chance” nie oznacza tu prawdopodobieństwa, jak w „a chance of rain”.</p>"
+    }
+  ]
+}

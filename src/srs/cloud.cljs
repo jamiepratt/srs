@@ -38,14 +38,14 @@
 (defn list-cards! [offset]
   (let [table (js-invoke client "from" "cards")
         query (js-invoke table "select"
-                         "id,front,back,deck,schedule,reviews,revision")
+                         "id,front,back,notes,deck,schedule,reviews,revision")
         ordered (js-invoke query "order" "created_at" #js {:ascending true})]
     (js-invoke ordered "range" offset (+ offset 999))))
 
 (defn insert-cards! [rows]
   (let [table (js-invoke client "from" "cards")
         query (js-invoke table "insert" (clj->js rows))]
-    (js-invoke query "select" "id,front,back,deck,schedule,reviews,revision")))
+    (js-invoke query "select" "id,front,back,notes,deck,schedule,reviews,revision")))
 
 (defn update-card! [id revision fields]
   (let [table (js-invoke client "from" "cards")
@@ -53,7 +53,7 @@
         by-id (js-invoke query "eq" "id" id)
         by-revision (js-invoke by-id "eq" "revision" revision)]
     (js-invoke by-revision "select"
-               "id,front,back,deck,schedule,reviews,revision")))
+               "id,front,back,notes,deck,schedule,reviews,revision")))
 
 (defn delete-card! [id revision]
   (let [table (js-invoke client "from" "cards")

@@ -1,7 +1,7 @@
 \set ON_ERROR_STOP on
-insert into cards(id,user_id,front,back,deck,schedule) values
+insert into cards(id,user_id,front,back,notes,deck,schedule) values
 ('00000000-0000-0000-0000-000000000021',
- '00000000-0000-0000-0000-000000000001','Question','Answer','Renamed',
+ '00000000-0000-0000-0000-000000000001','Question','Answer','<p>Definition and translation note</p>','Renamed',
  '{"fsrs-version":6,"step":0,"state":"review"}'::jsonb);
 update decks set is_shared=true where user_id='00000000-0000-0000-0000-000000000001'
   and name='Renamed';
@@ -11,6 +11,9 @@ begin
   if not exists (select 1 from decks where user_id='00000000-0000-0000-0000-000000000004'
                  and name='Renamed' and not is_shared) then
     raise exception 'New account missing private copy';
+  end if;
+  if not exists (select 1 from cards where user_id='00000000-0000-0000-0000-000000000004' and notes='<p>Definition and translation note</p>') then
+    raise exception 'New account missing notes';
   end if;
 end;
 $$;
@@ -37,7 +40,7 @@ begin
     raise exception 'Copied deck should stay private';
   end if;
   if not exists (select 1 from cards where deck='Clone' and reviews='[]'::jsonb
-                 and schedule->>'state'='new') then
+                 and schedule->>'state'='new' and notes='<p>Definition and translation note</p>') then
     raise exception 'Cards were not copied with fresh progress';
   end if;
   if exists (select 1 from shared_deck_catalog() where deck_name='Clone') then

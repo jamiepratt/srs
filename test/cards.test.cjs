@@ -22,13 +22,14 @@ function app() {
     .dispatchEvent(new w.Event("submit", { cancelable: true }));
   return w;
 }
-function edit(w, front, back) {
+function edit(w, front, back, notes) {
   assert.ok(button(w, "Edit card"), "edit control exists");
   button(w, "Edit card").click();
   const fields = w.document.querySelectorAll(".edit-card textarea");
-  assert.equal(fields.length, 2);
+  assert.equal(fields.length, 3);
   fields[0].value = front;
   fields[1].value = back;
+  if (notes !== undefined) fields[2].value = notes;
   fields.forEach((f) => f.dispatchEvent(new w.Event("input")));
   button(w, "Save changes").click();
 }
@@ -248,7 +249,7 @@ test("cloud edits guard revision and update only contents, preserving history", 
   edit(w, "Cloud front", "Cloud back");
   await settle();
   assert.equal(w.rows[0].front, "Cloud front");
-  assert.deepEqual(Object.keys(w.fields).sort(), ["back", "front", "revision"]);
+  assert.deepEqual(Object.keys(w.fields).sort(), ["back", "front", "notes", "revision"]);
   assert.equal(w.filters.revision, 0);
   assert.equal(w.rows[0].revision, 1);
   assert.deepEqual(structuredClone(w.rows[0].schedule), before.schedule);
@@ -414,5 +415,68 @@ test("blank edit stays open and leaves saved contents intact", () => {
   assert.match(w.document.body.textContent, /cannot be empty/);
   assert.ok(w.document.querySelector(".edit-card"));
   assert.equal(w.localStorage.getItem(key), before);
+  w.close();
+});
+
+
+test("notes are optional, back-only, sanitized and persist across edits without resetting progress", () => {
+  const w = app();
+  button(w, "Show answer · Space").click();
+  assert.equal(w.document.querySelector(".card-notes"), null);
+  button(w, "3 Good").click();
+  w.document.querySelector(".list-card").click();
+  const before = JSON.parse(w.localStorage.getItem(key)).cards[0];
+  edit(w, "Question", "Answer", '<p><strong>Definition:</strong> a simple meaning.</p><script>alert(1)</script>');
+  assert.equal(w.document.querySelector(".card-notes"), null, "notes never reveal on the front");
+  button(w, "Show answer · Space").click();
+  const notes = w.document.querySelector(".answer .card-notes");
+  assert.match(notes.textContent, /Definition: a simple meaning/);
+  assert.ok(notes.querySelector("strong"));
+  assert.equal(notes.querySelector("script"), null);
+  const saved = JSON.parse(w.localStorage.getItem(key)).cards[0];
+  assert.deepEqual(saved.schedule, before.schedule);
+  assert.deepEqual(saved.reviews, before.reviews);
+  assert.match(saved.notes, /Definition/);
+  for (const empty of ["", "   ", "<p>&nbsp;<br></p>", "<script>alert(1)</script>"]) {
+    edit(w, "Question", "Answer", empty);
+    button(w, "Show answer · Space").click();
+    assert.equal(w.document.querySelector(".card-notes"), null, `no empty notes panel for ${empty}`);
+  }
+  w.close();
+});
+
+test("cloud notes edits retain history and the revision guard", async () => {
+  const w = await cloudApp();
+  const before = structuredClone(w.rows[0]);
+  edit(w, "Cloud front", "Cloud back", "<p>Translation note</p>");
+  await settle();
+  assert.equal(w.fields.notes, "<p>Translation note</p>");
+  assert.equal(w.filters.revision, before.revision);
+  assert.deepEqual(structuredClone(w.rows[0].schedule), before.schedule);
+  assert.equal(w.document.querySelector(".card-notes"), null);
+  button(w, "Show answer · Space").click();
+  assert.match(w.document.querySelector(".card-notes").textContent, /Translation note/);
+  w.close();
+});
+
+test("embedded song audio survives a different deck name and plays on the front", () => {
+  const seed = app();
+  const saved = JSON.parse(seed.localStorage.getItem(key));
+  seed.close();
+  saved.cards[0].deck = "My renamed copy";
+  saved.cards[0].front = '<p>We <mark>belong</mark>.</p><audio src="https://srs.submergedstructure.com/audio/geeks/belong.mp3" preload="none"></audio>';
+  const w = new JSDOM('<div id="app"></div>', { url: "https://example.test/#study", runScripts: "dangerously" }).window;
+  const played = [];
+  w.Audio = class { constructor(src) { this.src = src; } play() { played.push(this.src); return Promise.resolve(); } pause() {} };
+  w.localStorage.setItem(key, JSON.stringify(saved));
+  w.localStorage.setItem("jamiepratt.srs.decks.v1", JSON.stringify(["My renamed copy"]));
+  w.eval(fs.readFileSync("docs/js/purify.min.js", "utf8"));
+  w.eval(fs.readFileSync("docs/js/main.js", "utf8"));
+  assert.deepEqual(played, ["https://srs.submergedstructure.com/audio/geeks/belong.mp3"]);
+  button(w, "Play song clip").click();
+  assert.equal(played.length, 2);
+  button(w, "Show answer · Space").click();
+  assert.equal(played.length, 2, "revealing does not restart front audio");
+  assert.ok(button(w, "Play song clip"));
   w.close();
 });

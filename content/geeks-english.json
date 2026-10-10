@@ -1,0 +1,234 @@
+{
+  "deck_name": "The Geeks Will Inherit the Earth - English A2-B1",
+  "level": "A2-B1",
+  "source_title": "I Fight Dragons - The Geeks Will Inherit the Earth",
+  "source_url": "https://www.youtube.com/watch?v=Do61etbvpa4",
+  "phrases": [
+    {
+      "key": "talk",
+      "start": 14.14,
+      "end": 17.52,
+      "english": "I remember trying to talk to you in high school.",
+      "polish": "Pamiętam, jak w liceum próbowałem cię zagadać.",
+      "translation_note": "„Zagadać” pasuje do nieśmiałej próby nawiązania rozmowy. „High school” oddajemy jako „liceum”, choć amerykańska szkoła działa trochę inaczej."
+    },
+    {
+      "key": "too-cool",
+      "start": 17.52,
+      "end": 20.6,
+      "english": "Couldn't even get a look, 'cause you were too cool.",
+      "polish": "Ani spojrzenia. Taka z ciebie była gwiazda.",
+      "translation_note": "„Cool” oznacza tu kogoś popularnego, kto czuje się zbyt ważny, by zwrócić uwagę na narratora. „Gwiazda” zachowuje ironię; nie chodzi o chłód. „’Cause” to potoczne „because”."
+    },
+    {
+      "key": "new-rules",
+      "start": 20.6,
+      "end": 23.88,
+      "english": "But now we're older, and we're playing by the new rules.",
+      "polish": "Dziś jesteśmy starsi i gramy według nowych zasad.",
+      "translation_note": "„Grać według nowych zasad” zachowuje metaforę: w dorosłym życiu liczą się inne rzeczy niż popularność w szkole."
+    },
+    {
+      "key": "lived-and-learned",
+      "start": 23.88,
+      "end": 25.96,
+      "english": "We lived and learned.",
+      "polish": "Życie nas nauczyło.",
+      "translation_note": "To skrót myślowy: zdobyliśmy doświadczenie i wyciągnęliśmy wnioski. Naturalne „Życie nas nauczyło” lepiej oddaje sens niż dosłowne „Żyliśmy i uczyliśmy się”."
+    },
+    {
+      "key": "time-moves-on",
+      "start": 25.96,
+      "end": 29.46,
+      "english": "'Cause as time moves on...",
+      "polish": "Bo z biegiem lat...",
+      "translation_note": "„Time moves on” oznacza, że czas płynie. „Z biegiem lat” pasuje do opowieści o dorastaniu. „’Cause” jest potoczną formą „because”."
+    },
+    {
+      "key": "belong",
+      "start": 29.46,
+      "end": 32.78,
+      "english": "We find we belong.",
+      "polish": "Znajdujemy swoje miejsce.",
+      "translation_note": "Nie chodzi o własność. Bohaterowie odkrywają, że gdzieś pasują i są akceptowani. „Znaleźć swoje miejsce” oddaje ten sens po polsku."
+    },
+    {
+      "key": "in-the-end",
+      "start": 32.78,
+      "end": 36.02,
+      "english": "And then, in the end...",
+      "polish": "I tak, koniec końców...",
+      "translation_note": "„In the end” znaczy „ostatecznie”, po wszystkim, co się wydarzyło. Potoczne „koniec końców” pasuje do tonu piosenki."
+    },
+    {
+      "key": "make-fun-of",
+      "start": 36.02,
+      "end": 39.4,
+      "english": "We were the ones you used to make fun of.",
+      "polish": "To my byliśmy dla was pośmiewiskiem.",
+      "translation_note": "„Make fun of someone” to wyśmiewać kogoś, a nie bawić się z nim. „Used to” mówi o tym, co dawniej zdarzało się regularnie. „Wy” odnosi się tu do szkolnych dręczycieli."
+    },
+    {
+      "key": "instead-of",
+      "start": 39.4,
+      "end": 42.56,
+      "english": "We stayed at home alone instead of falling in love.",
+      "polish": "Siedzieliśmy sami w domu, zamiast się zakochiwać.",
+      "translation_note": "„Fall in love” tłumaczymy jako „zakochać się”, bez dosłownego upadania. „Instead of” znaczy „zamiast”; po nim czasownik ma formę z „-ing”."
+    },
+    {
+      "key": "prom-king",
+      "start": 42.56,
+      "end": 45.64,
+      "english": "We never got the chance to be prom king.",
+      "polish": "Na króla balu nikt z nas nie miał szans.",
+      "translation_note": "„Prom king” to chłopak wybrany królem szkolnego balu w USA. To symbol popularności. „Nie miał szans” brzmi naturalniej niż dosłowne „nie dostał szansy”."
+    },
+    {
+      "key": "heres-the-thing",
+      "start": 45.64,
+      "end": 48.84,
+      "english": "We didn't even dance, but here's the thing:",
+      "polish": "Nawet nie tańczyliśmy. Ale wiecie co?",
+      "translation_note": "„Here’s the thing” zapowiada ważny szczegół albo zmianę spojrzenia. „Ale wiecie co?” zachowuje swobodny, zaczepny ton. Nie chodzi o pokazywanie przedmiotu."
+    },
+    {
+      "key": "cars-and-money",
+      "start": 48.84,
+      "end": 51.72,
+      "english": "We got the cars, we got the money.",
+      "polish": "Mamy fury, mamy kasę.",
+      "translation_note": "„Fury” i „kasa” oddają przechwałki i luz oryginału. „We got” znaczy tutaj potocznie „we have”, czyli „mamy”."
+    },
+    {
+      "key": "some-sun",
+      "start": 51.72,
+      "end": 54.64,
+      "english": "We need some sun, but I'm telling you, honey,",
+      "polish": "Przydałoby się trochę słońca, ale mówię ci, skarbie,",
+      "translation_note": "To żart z bladych osób spędzających dużo czasu w domu. „Przydałoby się” zachowuje autoironię. „Honey” to czułe, tutaj lekko zaczepne „skarbie”, nie „miód”."
+    },
+    {
+      "key": "inherit-the-earth",
+      "start": 54.64,
+      "end": 62.6,
+      "english": "The geeks will inherit the earth.",
+      "polish": "Nerdy odziedziczą świat!",
+      "translation_note": "„Nerdy” zachowuje dumne, żartobliwe określenie fanów komputerów, gier czy nauki. „Odziedziczą świat” oznacza tu, że przyszłość będzie należeć do nich, a nie że dostaną ziemię w spadku."
+    },
+    {
+      "key": "different",
+      "start": 71.28,
+      "end": 74.0,
+      "english": "Everybody tries to tell you that you're different.",
+      "polish": "Wszyscy ci wmawiają, że do nich nie pasujesz.",
+      "translation_note": "Dosłownie: „że jesteś inny”. „Nie pasujesz” pokazuje sens w tej piosence: inni dają ci odczuć, że jesteś poza ich grupą. „Wmawiają” oddaje presję otoczenia."
+    },
+    {
+      "key": "makes-sense",
+      "start": 74.0,
+      "end": 77.22,
+      "english": "So you run away and wonder if it makes sense.",
+      "polish": "Więc uciekasz i się zastanawiasz, czy to ma sens.",
+      "translation_note": "„Make sense” to „mieć sens”, nie „robić sens”. „Wonder” oznacza tu zastanawianie się nad pytaniem, nie zachwyt. „Run away” to uciec lub wycofać się."
+    },
+    {
+      "key": "new-chance",
+      "start": 77.22,
+      "end": 80.36,
+      "english": "But the day will come when you will get a new chance.",
+      "polish": "Lecz nadejdzie dzień, gdy dostaniesz nową szansę.",
+      "translation_note": "„The day will come” brzmi jak obietnica lepszej przyszłości. „Nowa szansa” oznacza kolejną okazję, by coś zmienić lub pokazać, na co cię stać."
+    },
+    {
+      "key": "tables-turn",
+      "start": 80.36,
+      "end": 82.6,
+      "english": "The tables turn.",
+      "polish": "Role się odwrócą.",
+      "translation_note": "Ten idiom oznacza, że sytuacja się zmienia: przewagę zyskuje ktoś, kto wcześniej jej nie miał. Nie tłumaczymy go jako obracania stołów. Polski czas przyszły pasuje do obietnicy z poprzedniej linijki."
+    },
+    {
+      "key": "more-than-they-see",
+      "start": 82.6,
+      "end": 89.04,
+      "english": "And you know you'll be much more than they see.",
+      "polish": "I wiesz, że będziesz kimś więcej, niż oni w tobie widzą.",
+      "translation_note": "„See” oznacza tu ocenę człowieka, nie samo patrzenie. „Kimś więcej” podkreśla, że inni nie dostrzegają twoich możliwości."
+    },
+    {
+      "key": "in-time",
+      "start": 89.04,
+      "end": 92.42,
+      "english": "In time, you'll find...",
+      "polish": "Z czasem zrozumiesz...",
+      "translation_note": "„In time” oznacza tutaj „z czasem”, nie „na czas”. „Find” znaczy tu odkryć coś lub zrozumieć, a nie znaleźć zgubiony przedmiot."
+    }
+  ],
+  "words": [
+    {
+      "key": "cool",
+      "phrase": "too-cool",
+      "highlight": "cool",
+      "polish": "popularny; uważany za fajnego",
+      "definition": "Popular and liked by other people. In this song, the person thinks they are too important to notice the singer.",
+      "translation_note": "„Gwiazda” jest ironicznym odpowiednikiem „cool” w całym zdaniu. Nie oznacza tu osoby sławnej ani kogoś o niskiej temperaturze."
+    },
+    {
+      "key": "rules",
+      "phrase": "new-rules",
+      "highlight": "rules",
+      "polish": "zasady",
+      "definition": "Instructions that say what people can or cannot do. Here, they mean the things that matter for success.",
+      "translation_note": "„Nowe zasady gry” to metafora zmiany życia po szkole. Nie chodzi o reguły prawdziwej gry."
+    },
+    {
+      "key": "belong",
+      "phrase": "belong",
+      "highlight": "belong",
+      "polish": "pasować; czuć się częścią grupy",
+      "definition": "To feel accepted and comfortable as part of a group or in a place.",
+      "translation_note": "„Znajdujemy swoje miejsce” naturalnie oddaje „we find we belong”. Tutaj „belong” nie znaczy „być czyjąś własnością”."
+    },
+    {
+      "key": "prom",
+      "phrase": "prom-king",
+      "highlight": "prom",
+      "polish": "szkolny bal, zwykle pod koniec nauki",
+      "definition": "A formal dance for students, usually near the end of high school in the US.",
+      "translation_note": "„Król balu” to odpowiednik „prom king”. Nie zastępujemy „prom” słowem „studniówka”, bo to podobne, ale różne szkolne tradycje."
+    },
+    {
+      "key": "geeks",
+      "phrase": "inherit-the-earth",
+      "highlight": "geeks",
+      "polish": "nerdy; pasjonaci komputerów, gier lub nauki",
+      "definition": "People who are very interested in subjects such as computers, games or science. The word can be unkind, but the singers use it proudly here.",
+      "translation_note": "„Nerdy” zachowuje żart i dumę bohaterów. „Kujony” zbyt mocno kojarzyłyby się tylko z nauką szkolną i ocenami."
+    },
+    {
+      "key": "inherit",
+      "phrase": "inherit-the-earth",
+      "highlight": "inherit",
+      "polish": "odziedziczyć; tutaj: przejąć w przyszłości",
+      "definition": "To receive money or things from someone after they die. Here, it means to become the people who have success and power in the future.",
+      "translation_note": "„Odziedziczyć świat” jest metaforą: przyszłość będzie należeć do nerdów. „Świat” brzmi tu naturalniej niż „ziemia”, która mogłaby oznaczać działkę."
+    },
+    {
+      "key": "wonder",
+      "phrase": "makes-sense",
+      "highlight": "wonder",
+      "polish": "zastanawiać się",
+      "definition": "To think about a question because you want to know the answer.",
+      "translation_note": "W tym zdaniu „wonder” znaczy „zastanawiać się”, nie „dziwić się” ani „podziwiać”. Pytanie „czy to ma sens” oddaje niepewność bohatera."
+    },
+    {
+      "key": "chance",
+      "phrase": "new-chance",
+      "highlight": "chance",
+      "polish": "szansa; okazja",
+      "definition": "An opportunity to do something. Here, it is a new opportunity to succeed.",
+      "translation_note": "„Dostaniesz nową szansę” oznacza okazję do działania. „Chance” nie oznacza tu prawdopodobieństwa, jak w „a chance of rain”."
+    }
+  ]
+}

@@ -16,7 +16,7 @@ The card viewer is written in ClojureScript. It shows the front and back of a
 card, records one of the four FSRS ratings, and selects the next due card. It
 also lets you organize cards into decks, add cards, and export or import a JSON
 backup. Select any card in the list, then use **Edit card** to change its front
-and back without resetting its schedule or review history. **Cancel editing**
+and back and optional notes without resetting its schedule or review history. **Cancel editing**
 discards the draft. **Delete card** asks for confirmation and permanently removes
 the card and its history. Both actions work with browser storage and Supabase.
 Cloud conflicts refresh the cards and keep an unsaved edit visible; cancel editing
@@ -27,6 +27,29 @@ Card fronts and backs accept HTML fragments such as `<strong>`, lists, links,
 and images. HTML is sanitized when displayed; scripts and unsafe attributes are
 removed. Plain text and line breaks continue to display normally. The card
 list shows text extracted from each front.
+
+**Notes (optional, back only)** accepts the same sanitized HTML and plain text.
+Notes appear only after revealing the answer, in a smaller blue-tinted panel.
+Blank notes, including empty HTML, produce no panel. Existing cards need no
+changes. Notes are included in both backup formats and shared-deck copies.
+Migration `202610100001_card_notes.sql` adds the field and updates template copying.
+
+The shared **The Geeks Will Inherit the Earth - English A2-B1** deck contains
+20 phrase cards and 8 vocabulary cards for Polish-speaking learners. Vocabulary
+fronts highlight one English word in its lyric context. Answers use Polish;
+notes explain idiomatic translation choices and add simple English definitions
+for vocabulary. All 28 fronts play real excerpts from the supplied song video.
+**Play song clip** replays them. The audio URL travels with card content, so
+copying, importing, merging, or renaming this deck preserves playback.
+
+The reviewed content is in `content/geeks-english.json`; an importable content-only
+backup is published at `docs/decks/geeks-english.json`. To rebuild it and its clips:
+
+```sh
+python3 scripts/build-geeks-deck.py /absolute/path/to/source-video.mp4
+```
+
+No text-to-speech is used for this deck. Repeated chorus lines are taught once.
 
 Build the static site with:
 
@@ -39,6 +62,24 @@ Serve the `docs/` directory with a local HTTP server to use it. GitHub Pages
 publishes the `main` branch's `/docs` directory at
 [srs.submergedstructure.com](https://srs.submergedstructure.com/). The built
 JavaScript is committed so Pages does not need to run ClojureScript tooling.
+
+Release through `bash scripts/deploy.sh` on `main` after testing and committing
+the build. It checks the linked SRS project and applies pending migrations **before**
+pushing, which triggers the existing GitHub Pages deployment. A failed migration
+stops the push. This retains the site's existing hosting and custom domain.
+
+After the Pages run succeeds, publish or update a reviewed shared template:
+
+```sh
+python3 scripts/publish-shared-deck.py docs/decks/geeks-english.json --owner OWNER_UUID
+python3 scripts/publish-shared-deck.py docs/decks/geeks-english.json --owner OWNER_UUID --apply
+```
+
+The first command is a dry run. The second verifies the deployed audio matches
+local assets, then publishes transactionally through the linked Supabase project.
+Stable card IDs make reruns idempotent; content updates retain existing schedules
+and reviews. Existing private copies are not overwritten. New accounts receive
+the shared template automatically; existing accounts can copy it from Manage decks.
 
 ## User accounts and storage
 
